@@ -115,7 +115,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ru.vassuv.familytree"
-            packageVersion = "0.0.1"
+            packageVersion = "1.0.0"
         }
     }
 }
