@@ -1,8 +1,9 @@
 *.iml
-settings.gradle.kts.txt
+settings.gradle.kts
 .kotlin
 .gradle
 **/build/
+**/version.txt
 xcuserdata
 !src/**/build/
 local.properties

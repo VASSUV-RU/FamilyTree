@@ -1,4 +1,4 @@
-package ru.vassuv.familytree
+package ru.vassuv.familytree.server
 
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -10,9 +10,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.routing.get
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import ru.vassuv.familytree.Greeting
+import ru.vassuv.familytree.User
 
 fun main() {
-    embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = 8081, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 

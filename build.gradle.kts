@@ -7,4 +7,17 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.shadow) apply false
+}
+
+
+tasks.create<Delete>("clean") {
+    outputs.upToDateWhen { false }
+    delete =
+        File(".")
+            .walkTopDown()
+            .filter { it.isDirectory }
+            .filter { it.name == "build" || it.name == ".gradle" }
+            .filter { !it.path.contains(".transforms") }
+            .toSet()
 }

@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.maven
+
 rootProject.name = "FamilyTree"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -12,6 +14,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -25,10 +28,12 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
-include(":composeApp")
+//include(":composeApp")
 include(":server")
 include(":telegrambot")
 include(":shared")
+include(":testgradle")
