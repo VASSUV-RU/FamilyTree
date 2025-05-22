@@ -34,6 +34,8 @@ dependencyResolutionManagement {
 
 //include(":composeApp")
 include(":server")
+include(":server-api")
+include(":server-service")
+include(":server-repository")
 include(":telegrambot")
 include(":shared")
-include(":testgradle")

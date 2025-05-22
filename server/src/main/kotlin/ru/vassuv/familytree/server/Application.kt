@@ -1,72 +1,50 @@
 package ru.vassuv.familytree.server
 
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.application.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.routing.*
-import io.ktor.server.routing.get
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import ru.vassuv.familytree.Greeting
-import ru.vassuv.familytree.User
+import org.koin.ktor.ext.inject
+import org.koin.ktor.plugin.Koin
+import ru.vassuv.familytree.server.config.JsonInstaller
+import ru.vassuv.familytree.server.config.StatusPagesInstaller
+import ru.vassuv.familytree.server.db.DatabaseFactoryInstaller
+import ru.vassuv.familytree.server.di.configModule
+import ru.vassuv.familytree.server.di.repositoryModule
+import ru.vassuv.familytree.server.di.routingModule
+import ru.vassuv.familytree.server.di.serviceModule
 
 fun main() {
-    embeddedServer(Netty, port = 8081, host = "0.0.0.0", module = Application::module)
+    embeddedServer(
+        factory = Netty,
+        port = 8081,
+        host = "0.0.0.0",
+        module = Application::module
+    )
         .start(wait = true)
 }
 
-fun Application.module() {
-    install(ContentNegotiation) {
-        jackson()
-    }
-    configureRouting()
-}
-
-fun Application.configureRouting() {
-    val userService = UserService()
-    routing {
-        route("/") {
-            get {
-                call.respondText("Ktor: ${Greeting().greet()}")
-            }
-        }
-        route("/test") {
-            get {
-                call.respondText("Hello World test!")
-            }
-        }
-        route("/users") {
-            get {
-                runCatching {
-                    call.respond(userService.getUsers())
-                }.exceptionOrNull()?.let {
-                    call.respondText(it.message ?: it.stackTraceToString())
-                }
-            }
-            post {
-                val user = call.receive<User>()
-                userService.addUser(user)
-                call.respond(HttpStatusCode.Created)
-            }
-        }
-    }
-}
-
-class UserService {
-    private val users = mutableListOf(
-        User(1L, "test", "test@a.b"),
-        User(2L, "dev", "dev@a.b"),
-        User(3L, "manager", "manager@a.b"),
-    )
-
-    fun getUsers(): List<User> {
-        return users
+internal fun Application.module(testing: Boolean = false) {
+    // Конфигурация DI
+    install(Koin) {
+        modules(configModule, repositoryModule, serviceModule, routingModule)
     }
 
-    fun addUser(user: User) {
-        users.add(user)
+    // Настройка json сериализации
+    val jsonInstaller: JsonInstaller by inject()
+    jsonInstaller(this)
+
+    // Настройка автоматической конвертации исключений в соответсвующие ошибки
+    val statusPagesInstaller: StatusPagesInstaller by inject()
+    statusPagesInstaller(this)
+
+    // Настройка базы данных
+    if(!testing) {
+        val databaseFactoryInstaller by inject<DatabaseFactoryInstaller>()
+        databaseFactoryInstaller()
     }
+
+    // Настройка роутера
+    val routerInstaller: RouterInstaller by inject()
+    routerInstaller(this)
+
 }
