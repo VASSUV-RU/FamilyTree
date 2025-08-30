@@ -17,7 +17,7 @@
 - `member:leave` — покинуть семью.
 
 ## Разрешения
-- `role:permission:update` — менять роли участникам.
+- `role:permissions:update` — изменять разрешения ролям внутри семьи.
 
 ## Источники (media sources)
 - `source:read` — просматривать список источников.
