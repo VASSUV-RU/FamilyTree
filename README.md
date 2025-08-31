@@ -41,6 +41,7 @@
 - Авторизация: `docs/authorization/README.md`
 - Базовые права и роли: `docs/base/permissions.md`, `docs/base/roles.md`
 - Идентичности: `docs/base/user-member-person.md`
+- User (сущность): `docs/base/user.md`
 - Семьи и участники: `docs/family/entities.md`, `docs/family/families.md`, `docs/family/members.md`, `docs/family/invitations.md`
 - Требования и срез API: `docs/REQUIREMENTS.md`
 
