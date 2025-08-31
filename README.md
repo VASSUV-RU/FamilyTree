@@ -39,16 +39,16 @@
 
 ## Документация
 - Guides (доменные сценарии):
-  - Авторизация: `docs/guides/authorization/README.md`
-  - Семья: `docs/guides/family/families.md`, `docs/guides/family/members.md`, `docs/guides/family/invitations.md`
-  - Медиа: `docs/guides/media/README.md`
-  - Генеалогия: `docs/guides/genealogy/README.md`
+  - Авторизация: [docs/guides/authorization/README.md](docs/guides/authorization/README.md)
+  - Семья: [families](docs/guides/family/families.md), [members](docs/guides/family/members.md), [invitations](docs/guides/family/invitations.md)
+  - Медиа: [docs/guides/media/README.md](docs/guides/media/README.md)
+  - Генеалогия: [docs/guides/genealogy/README.md](docs/guides/genealogy/README.md)
 - Reference (справочники):
-  - Permissions/Roles: `docs/reference/permissions.md`, `docs/reference/roles.md`
-  - Entities: `docs/reference/entities/user.md`, `docs/reference/entities/identity.md`, `docs/reference/entities/family.md`, `docs/reference/entities/member.md`, `docs/reference/entities/person.md`, `docs/reference/entities/invitation.md`, `docs/reference/entities/relation.md`
-  - Errors: `docs/reference/errors.md`
-  - API (OpenAPI): `docs/reference/api/openapi.yaml`
-- Flows: `docs/flows/login-telegram.md`, `docs/flows/invite-accept.md`, `docs/flows/switch-family.md`, `docs/flows/refresh-token.md`, `docs/flows/sync.md`
-- Требования и срез API: `docs/REQUIREMENTS.md`
+  - Permissions/Roles: [permissions](docs/reference/permissions.md), [roles](docs/reference/roles.md)
+  - Entities: [user](docs/reference/entities/user.md), [identity](docs/reference/entities/identity.md), [family](docs/reference/entities/family.md), [member](docs/reference/entities/member.md), [person](docs/reference/entities/person.md), [invitation](docs/reference/entities/invitation.md), [relation](docs/reference/entities/relation.md)
+  - Errors: [docs/reference/errors.md](docs/reference/errors.md)
+  - API (OpenAPI): [docs/reference/api/openapi.yaml](docs/reference/api/openapi.yaml)
+- Flows: [login-telegram](docs/flows/login-telegram.md), [invite-accept](docs/flows/invite-accept.md), [switch-family](docs/flows/switch-family.md), [refresh-token](docs/flows/refresh-token.md), [sync](docs/flows/sync.md)
+- Требования и срез API: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
 
 Документация будет дополняться по мере развития проекта.

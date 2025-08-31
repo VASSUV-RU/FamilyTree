@@ -1,6 +1,6 @@
 # Участники семьи
 
-Схема данных: см. `../../reference/entities/member.md`.
+Схема данных: см. [reference/entities/member.md](../../reference/entities/member.md).
 
 ## 1. Управление ролями
 
@@ -22,7 +22,7 @@ sequenceDiagram
 ## 3. Эндпоинты
 
 ### 3.1 `GET /families/{id}/members`
-Список участников семьи. Требуется право `family:read` (см. `../../reference/permissions.md`).
+Список участников семьи. Требуется право `family:read` (см. [reference/permissions.md](../../reference/permissions.md)).
 
 Успешный ответ:
 
@@ -35,7 +35,7 @@ sequenceDiagram
 Ошибки: `403 FORBIDDEN`, `404 FAMILY_NOT_FOUND`.
 
 ### 3.2 Добавление участника
-Добавление новых участников осуществляется через систему приглашений. См. `./invitations.md`.
+Добавление новых участников осуществляется через систему приглашений. См. [invitations](./invitations.md).
 
 ### 3.3 `PATCH /families/{id}/members/{userId}`
 Изменить роль или статус участника. Право `member:role:update`.

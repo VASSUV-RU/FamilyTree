@@ -2,8 +2,8 @@
 
 Документ описывает сущность семьи и операции с ней.
 
-Схема данных: см. `../../reference/entities/family.md`.
-Права: см. `../../reference/permissions.md`.
+Схема данных: см. [reference/entities/family.md](../../reference/entities/family.md).
+Права: см. [reference/permissions.md](../../reference/permissions.md).
 
 ## 1. Операции API
 

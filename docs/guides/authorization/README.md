@@ -12,7 +12,7 @@
 - **capVersion** — версия прав пользователя для синхронизации и проверки актуальности.
 - **scopes** — перечень permissions, применимых для активной семьи; термин scopes в ответах API равнозначен permissions.
 
-Подробнее о ролях и правах: см. `../../reference/roles.md`, `../../reference/permissions.md`.
+Подробнее о ролях и правах: см. [roles](../../reference/roles.md), [permissions](../../reference/permissions.md).
 
 ## 2. Цели
 
@@ -192,8 +192,8 @@ Refresh-токен хранится в cookie с флагами `httpOnly`, `Sec
 
 ## 12. Сущность User (авторизация)
 
-Сущность `User` описана в `../../reference/entities/user.md`.
+Сущность `User` описана в [reference/entities/user.md](../../reference/entities/user.md).
 
 Ключевые моменты для авторизации:
-- Права и роли выводятся из `Member` активной семьи (см. `../../reference/roles.md`, `../../reference/permissions.md`).
-- Привязка к узлу дерева выполняется через `Member.personId` (см. `../../reference/entities/identity.md`).
+- Права и роли выводятся из `Member` активной семьи (см. [roles](../../reference/roles.md), [permissions](../../reference/permissions.md)).
+- Привязка к узлу дерева выполняется через `Member.personId` (см. [identity](../../reference/entities/identity.md)).

@@ -16,12 +16,12 @@
 
 ## Функциональные требования
 - Аутентификация/авторизация
-  - Вход через Telegram; обновление `access` по `refresh` (JWT). См. `docs/guides/authorization/README.md`.
+  - Вход через Telegram; обновление `access` по `refresh` (JWT). См. [docs/guides/authorization/README.md](docs/guides/authorization/README.md).
   - Хранение и выбор активной семьи пользователем.
-  - Роли и права: см. `docs/reference/roles.md`, `docs/reference/permissions.md`.
+  - Роли и права: см. [docs/reference/roles.md](docs/reference/roles.md), [docs/reference/permissions.md](docs/reference/permissions.md).
 - Семьи и участники
   - CRUD семьи (создать, получить, обновить, удалить — удаление доступно владельцу).
-  - Управление участниками: добавление по приглашению, изменение роли, удаление. См. `docs/guides/family/*`.
+  - Управление участниками: добавление по приглашению, изменение роли, удаление. См. [docs/guides/family/*](docs/guides/family/).
   - Приглашения: генерация, принятие, отзыв; интеграция с Telegram‑ботом.
 - Источники и медиа
   - Подключение источника (минимум один: Telegram или Яндекс.Диск) и хранение конфигурации подключений.
@@ -51,7 +51,7 @@
 - Media: список, комментарии (минимальная версия).
 
 ## Схемы данных
-Справочник сущностей: `docs/reference/entities/*`.
+Справочник сущностей: [docs/reference/entities/*](docs/reference/entities/).
 
 ## Критерии готовности (MVP)
 - Реализованы и задокументированы сценарии из разделов «Зона MVP» и «API».

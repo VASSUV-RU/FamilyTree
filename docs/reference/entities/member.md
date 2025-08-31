@@ -6,7 +6,6 @@
 |------------|--------|---------------------------------------------------------------------|
 | `userId`   | string | Пользователь.                                                       |
 | `familyId` | string | Семья.                                                              |
-| `role`     | string | Роль в семье (`owner`, `admin`, `member`, `guest`). См. `../roles.md`. |
+| `role`     | string | Роль в семье (`owner`, `admin`, `member`, `guest`). См. [roles](../roles.md). |
 | `status`   | string | Статус участия: `active` или `invited`.                             |
 | `personId` | string | (опц.) Связанный узел в дереве семьи (`Person`).                    |
-
