@@ -2,7 +2,7 @@
 
 Минимальная модель людей и связей родства и базовые операции чтения/изменения.
 
-## Права (см. ../base/permissions.md)
+## Права (см. ../../reference/permissions.md)
 - genealogy:person:create / genealogy:person:update / genealogy:person:delete
 - genealogy:relation:create / genealogy:relation:update / genealogy:relation:delete
 - genealogy:tree:read — получение дерева семьи

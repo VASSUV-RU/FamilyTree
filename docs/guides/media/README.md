@@ -6,7 +6,7 @@
 - Источник (Source) — подключение к внешнему хранилищу (например, Telegram, Яндекс.Диск).
 - Объект медиа (MediaItem) — фото/видео/документ, индексированный из источника (без копирования файла).
 
-## Права (см. ../base/permissions.md)
+## Права (см. ../../reference/permissions.md)
 - source:read / source:create / source:update / source:delete
 - media:list / media:download
 - media:comment:create / media:comment:delete / media:comment:moderate

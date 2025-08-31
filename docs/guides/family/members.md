@@ -1,6 +1,6 @@
 # Участники семьи
 
-Схема данных: см. `../family/entities.md#member`.
+Схема данных: см. `../../reference/entities/member.md`.
 
 ## 1. Управление ролями
 
@@ -22,7 +22,7 @@ sequenceDiagram
 ## 3. Эндпоинты
 
 ### 3.1 `GET /families/{id}/members`
-Список участников семьи. Требуется право `family:read` (см. `../base/permissions.md`).
+Список участников семьи. Требуется право `family:read` (см. `../../reference/permissions.md`).
 
 Успешный ответ:
 

@@ -1,6 +1,6 @@
 # Приглашения
 
-Схема данных: см. `../family/entities.md#invitation`.
+Схема данных: см. `../../reference/entities/invitation.md`.
 
 Только участники с пермишеном `member:invite:create` (обычно owner и admin) могут создавать приглашения.
 

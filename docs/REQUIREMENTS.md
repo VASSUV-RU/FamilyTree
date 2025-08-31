@@ -16,12 +16,12 @@
 
 ## Функциональные требования
 - Аутентификация/авторизация
-  - Вход через Telegram; обновление `access` по `refresh` (JWT). См. `docs/authorization/README.md`.
+  - Вход через Telegram; обновление `access` по `refresh` (JWT). См. `docs/guides/authorization/README.md`.
   - Хранение и выбор активной семьи пользователем.
-  - Роли и права: см. `docs/base/roles.md`, `docs/base/permissions.md`.
+  - Роли и права: см. `docs/reference/roles.md`, `docs/reference/permissions.md`.
 - Семьи и участники
   - CRUD семьи (создать, получить, обновить, удалить — удаление доступно владельцу).
-  - Управление участниками: добавление по приглашению, изменение роли, удаление. См. `docs/family/*`.
+  - Управление участниками: добавление по приглашению, изменение роли, удаление. См. `docs/guides/family/*`.
   - Приглашения: генерация, принятие, отзыв; интеграция с Telegram‑ботом.
 - Источники и медиа
   - Подключение источника (минимум один: Telegram или Яндекс.Диск) и хранение конфигурации подключений.
@@ -45,17 +45,17 @@
 
 ## API (верхнеуровневой срез)
 - Auth: `POST /auth/telegram/verify`, `POST /auth/refresh`, `POST /auth/logout`, `POST /me/active-family`.
-- Families: `POST/GET/PATCH/DELETE /families`, `GET /families/{id}`.
-- Members: `GET/POST/PATCH/DELETE /families/{id}/members`.
+- Families: `POST /families`, `GET/PATCH/DELETE /families/{id}` (опц. `GET /families` — список семей пользователя).
+- Members: `GET/PATCH/DELETE /families/{id}/members` (добавление — через Invites).
 - Invites: `POST/GET /families/{id}/invites`, `POST /invites/{token}/accept`, `DELETE /families/{id}/invites/{inviteId}`.
 - Media: список, комментарии (минимальная версия).
 
 ## Схемы данных
-Собраны в `docs/family/entities.md` (Family, Member, Invitation) и доп. базовые в `docs/base/*`.
+Справочник сущностей: `docs/reference/entities/*`.
 
 ## Критерии готовности (MVP)
 - Реализованы и задокументированы сценарии из разделов «Зона MVP» и «API».
-- Роли/права применяются на уровне эндпоинтов и бизнес‑логики, таблица доступов соответствует `docs/base/roles.md`.
+- Роли/права применяются на уровне эндпоинтов и бизнес‑логики, таблица доступов соответствует `docs/reference/roles.md`.
 - Возможен локальный запуск (Docker/PostgreSQL) и базовая синхронизация хотя бы с одним источником.
 - Минимальный набор тестов проходит; линт/сборка зелёные.
 

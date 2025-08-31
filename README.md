@@ -38,11 +38,17 @@
 ---
 
 ## Документация
-- Авторизация: `docs/authorization/README.md`
-- Базовые права и роли: `docs/base/permissions.md`, `docs/base/roles.md`
-- Идентичности: `docs/base/user-member-person.md`
-- User (сущность): `docs/base/user.md`
-- Семьи и участники: `docs/family/entities.md`, `docs/family/families.md`, `docs/family/members.md`, `docs/family/invitations.md`
+- Guides (доменные сценарии):
+  - Авторизация: `docs/guides/authorization/README.md`
+  - Семья: `docs/guides/family/families.md`, `docs/guides/family/members.md`, `docs/guides/family/invitations.md`
+  - Медиа: `docs/guides/media/README.md`
+  - Генеалогия: `docs/guides/genealogy/README.md`
+- Reference (справочники):
+  - Permissions/Roles: `docs/reference/permissions.md`, `docs/reference/roles.md`
+  - Entities: `docs/reference/entities/user.md`, `docs/reference/entities/identity.md`, `docs/reference/entities/family.md`, `docs/reference/entities/member.md`, `docs/reference/entities/person.md`, `docs/reference/entities/invitation.md`, `docs/reference/entities/relation.md`
+  - Errors: `docs/reference/errors.md`
+  - API (OpenAPI): `docs/reference/api/openapi.yaml`
+- Flows: `docs/flows/login-telegram.md`, `docs/flows/invite-accept.md`, `docs/flows/switch-family.md`, `docs/flows/refresh-token.md`, `docs/flows/sync.md`
 - Требования и срез API: `docs/REQUIREMENTS.md`
 
 Документация будет дополняться по мере развития проекта.

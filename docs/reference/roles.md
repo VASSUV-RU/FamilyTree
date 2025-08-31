@@ -23,3 +23,4 @@
 | genealogy:person:delete | ✅ | ✅ | ❌ | ❌ |
 | sync:trigger | ✅ | ✅ | ❌ | ❌ |
 | security:audit:view | ✅ | ✅ | ❌ | ❌ |
+
