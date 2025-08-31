@@ -50,7 +50,8 @@
 - POST /media/{mediaId}/download-link — [media:download] короткоживущая ссылка или прокси‑токен для внешнего сервиса.
 
 ### Комментарии
-- GET /media/{mediaId}/comments — [media:comment:create|moderate|delete] чтение доступно всем с media:list.
+- GET /media/{mediaId}/comments — чтение доступно при [media:list];
+  права на создание/удаление см. ниже.
 - POST /media/{mediaId}/comments — [media:comment:create] добавить комментарий.
 - DELETE /media/{mediaId}/comments/{commentId} — [media:comment:delete] удалить свой; [media:comment:moderate] — модерация чужих.
 
@@ -61,4 +62,3 @@
 ## Заметки по интеграциям
 - Файлы не копируются в сервис; индексируются только метаданные и выдается короткоживущая ссылка/токен.
 - Синхронизация инициируется по расписанию/событию или вручную [sync:trigger]; состояние доступно по [sync:observe].
-
