@@ -22,7 +22,7 @@ sequenceDiagram
 ## 3. Эндпоинты
 
 ### 3.1 `GET /families/{id}/members`
-Список участников семьи. Требуется право `member:list`.
+Список участников семьи. Требуется право `family:read` (см. `../base/permissions.md`).
 
 Успешный ответ:
 
@@ -34,25 +34,11 @@ sequenceDiagram
 
 Ошибки: `403 FORBIDDEN`, `404 FAMILY_NOT_FOUND`.
 
-### 3.2 `POST /families/{id}/members`
-Добавить участника. Право `member:add`.
-
-Запрос:
-
-```json
-{ "userId": "u-2", "role": "member" }
-```
-
-Успешный ответ:
-
-```json
-{ "userId": "u-2", "role": "member", "status": "invited" }
-```
-
-Ошибки: `404 USER_NOT_FOUND`, `409 ALREADY_MEMBER`.
+### 3.2 Добавление участника
+Добавление новых участников осуществляется через систему приглашений. См. `./invitations.md`.
 
 ### 3.3 `PATCH /families/{id}/members/{userId}`
-Изменить роль или статус участника. Право `member:update`.
+Изменить роль или статус участника. Право `member:role:update`.
 
 Запрос:
 

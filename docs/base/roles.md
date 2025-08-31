@@ -13,7 +13,7 @@
 | --- | --- | --- | --- | --- |
 | family:read | ✅ | ✅ | ✅ | ✅ |
 | family:update | ✅ | ✅ | ❌ | ❌ |
-| member:invite:create | ✅ | ✅ | ✅ | ❌ |
+| member:invite:create | ✅ | ✅ | ❌ | ❌ |
 | member:role:update | ✅ | ✅ | ❌ | ❌ |
 | role:permissions:update | ✅ | ❌ | ❌ | ❌ |
 | source:create | ✅ | ✅ | ❌ | ❌ |

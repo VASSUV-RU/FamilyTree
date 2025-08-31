@@ -41,6 +41,7 @@
 - Эксплуатация
   - Контейнеризация (Dockerfile + docker-compose для локального запуска с PostgreSQL).
   - Конфигурация через ENV/`application.yml`. Профили: `local`, `dev`, `prod`.
+  - Redis — хранение серверных сессий и блок‑листа JWT (`sess:{jti}`, `blk:{jti}`), защита от повторов (`used_hash:{hash}`).
 
 ## API (верхнеуровневой срез)
 - Auth: `POST /auth/telegram/verify`, `POST /auth/refresh`, `POST /auth/logout`, `POST /me/active-family`.
@@ -50,7 +51,7 @@
 - Media: список, комментарии (минимальная версия).
 
 ## Схемы данных
-Собраны в `docs/families/entities.md` (Family, Member, Invitation) и доп. базовые в `docs/base/*`.
+Собраны в `docs/family/entities.md` (Family, Member, Invitation) и доп. базовые в `docs/base/*`.
 
 ## Критерии готовности (MVP)
 - Реализованы и задокументированы сценарии из разделов «Зона MVP» и «API».
@@ -62,4 +63,3 @@
 - Расширенная модерация и права на уровне объектов медиа.
 - Импорт/экспорт дерева родства, визуализации.
 - Поддержка дополнительных источников и очередей (Kafka/RabbitMQ).
-

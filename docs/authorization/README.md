@@ -2,12 +2,17 @@
 
 Документ описывает процесс входа в систему, управление сессиями и выдачу прав.
 
+Зависимости: используется Redis для хранения серверных сессий и блок‑листа (`sess:{jti}`, `blk:{jti}`) и защиты от повторов (`used_hash:{hash}`).
+
 ## 1. Термины
 
 - **access-JWT** — короткоживущий JWT, содержащий `sub`, `jti`, `iat`, `exp`.
 - **refresh-токен** — токен в httpOnly-куке, используемый для получения нового access-JWT.
 - **jti** — идентификатор сессии; используется в ключах `sess:{jti}` и `blk:{jti}`.
 - **capVersion** — версия прав пользователя для синхронизации и проверки актуальности.
+- **scopes** — перечень permissions, применимых для активной семьи; термин scopes в ответах API равнозначен permissions.
+
+Подробнее о ролях и правах: см. `../base/roles.md`, `../base/permissions.md`.
 
 ## 2. Цели
 
@@ -81,7 +86,7 @@
   "expiresIn": 900,
   "user": { "id": "u-123", "name": "Vasiliy" },
   "activeFamilyId": "f-456",
-  "scopes": ["media:list","media:download","tree:read"],
+  "scopes": ["media:list","media:download","genealogy:tree:read"],
   "refreshTokenSet": true
 }
 ```
