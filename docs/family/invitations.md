@@ -51,7 +51,7 @@ sequenceDiagram
 Тело запроса:
 
 ```json
-{ "contact": "@username", "role": "member" }
+{ "contact": "@username", "role": "member", "personId": "p-123" }
 ```
 
 Успешный ответ:
@@ -63,6 +63,7 @@ sequenceDiagram
   "inviterId": "u-1",
   "contact": "@username",
   "role": "member",
+  "personId": "p-123",
   "expiresAt": 0,
   "status": "pending"
 }
@@ -106,6 +107,7 @@ sequenceDiagram
   "id": "inv-1",
   "familyId": "f-1",
   "role": "member",
+  "personId": "p-123",
   "status": "accepted"
 }
 ```
@@ -131,3 +133,7 @@ sequenceDiagram
 ### 4.2 Уведомления в семейный чат
 - Владелец семьи вручную приглашает бота в чат.
 - После подключения бот может публиковать сервисные сообщения и приглашать новых участников в чат (если Telegram позволяет).
+
+## 5. Привязка к существующему Person через приглашение
+- Если при создании приглашения указан `personId`, то после принятия инвайта создаётся членство `Member(active)` с полем `personId`, указывающим на существующую персону в дереве.
+- Если `personId` не указан, привязка может быть выполнена вручную owner/admin после онбординга или пользователем с последующим подтверждением.

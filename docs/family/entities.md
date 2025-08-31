@@ -23,6 +23,7 @@
 | `familyId` | string | Семья.                                                              |
 | `role`     | string | Роль в семье (`owner`, `admin`, `member`, `guest`). См. `../base/roles.md`. |
 | `status`   | string | Статус участия: `active` или `invited`.                             |
+| `personId` | string | (опц.) Связанный узел в дереве семьи (`Person`).                    |
 
 ## Invitation
 
