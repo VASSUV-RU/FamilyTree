@@ -6,3 +6,4 @@ spring:
     password: family
   jpa:
     show-sql: true
+

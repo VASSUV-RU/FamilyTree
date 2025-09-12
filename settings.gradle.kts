@@ -5,5 +5,6 @@ include(
     "app:service",
     "app:data",
     "app:bot-telegram",
+    "app:application",
 )
-
+include("app:libs:exceptionhandler")

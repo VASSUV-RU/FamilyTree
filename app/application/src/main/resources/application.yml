@@ -19,6 +19,13 @@ spring:
   profiles:
     include: local
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: yourpassword
+      database: 0
+
 management:
   endpoints:
     web:
@@ -27,4 +34,9 @@ management:
 
 server:
   port: 8080
+
+auth:
+  telegram:
+    bot-username: ${BOT_USERNAME:my_family_bot}
+    session-ttl-seconds: ${TELEGRAM_SESSION_TTL:300}
 

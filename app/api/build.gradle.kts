@@ -6,20 +6,20 @@ plugins {
 dependencies {
     implementation(project(":app:service"))
     implementation(project(":app:data"))
-    implementation(project(":app:bot-telegram"))
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     runtimeOnly("org.postgresql:postgresql") // или твой драйвер
 
+    api("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-inline:5.2.0") // вместо mockito-core
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

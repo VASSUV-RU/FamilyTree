@@ -13,7 +13,7 @@ COPY bot-telegram/build.gradle.kts bot-telegram/build.gradle.kts
 RUN --mount=type=cache,target=/home/gradle/.gradle gradle help
 
 # Copy sources
-COPY . .
+COPY ../api .
 
 # Build only the API boot jar (pulling in subprojects)
 RUN --mount=type=cache,target=/home/gradle/.gradle gradle :api:bootJar --no-daemon

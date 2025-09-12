@@ -18,10 +18,19 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: familytree-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass yourpassword
+    volumes:
+      - redis_data:/data
+
   app:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: application/Dockerfile
     container_name: familytree-api
     depends_on:
       db:
@@ -39,4 +48,5 @@ services:
 
 volumes:
   pgdata: {}
+  redis_data:
 
