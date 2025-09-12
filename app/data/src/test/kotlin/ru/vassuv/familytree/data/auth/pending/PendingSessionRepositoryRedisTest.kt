@@ -123,5 +123,10 @@ class PendingSessionRepositoryRedisTest {
         assertTrue((a == MarkReadyResult.Ok && (b == MarkReadyResult.Conflict || b == MarkReadyResult.AlreadyReady)) ||
                    (b == MarkReadyResult.Ok && (a == MarkReadyResult.Conflict || a == MarkReadyResult.AlreadyReady)))
     }
-}
 
+    @Test
+    fun `markUsed on missing sid returns NotFound`() {
+        val res = repo.markUsed("S_not_exist")
+        assertEquals(MarkUsedResult.NotFound, res)
+    }
+}

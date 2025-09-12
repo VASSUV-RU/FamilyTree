@@ -1,11 +1,13 @@
 package ru.vassuv.familytree.api.controller
 
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import ru.vassuv.familytree.api.controller.dto.request.CreateTelegramSessionRequest
 import ru.vassuv.familytree.api.controller.dto.response.CreateTelegramSessionResponse
+import ru.vassuv.familytree.config.TelegramAuthProperties
 import ru.vassuv.familytree.service.auth.TelegramSessionService
 
 @RestController
@@ -13,22 +15,18 @@ import ru.vassuv.familytree.service.auth.TelegramSessionService
 @Validated
 class TelegramController(
     private val service: TelegramSessionService,
-    @Value("\${auth.telegram.bot-username}")
-    private val botUsername: String,
-    @Value("\${auth.telegram.session-ttl-seconds:300}")
-    private val sessionTtlSeconds: Long,
+    private val props: TelegramAuthProperties,
 ) {
     @PostMapping("/session")
     fun createSession(@RequestBody(required = false) req: CreateTelegramSessionRequest?): CreateTelegramSessionResponse {
-        if (botUsername.isBlank()) {
+        if (props.botUsername.isBlank()) {
             error("botUsername is blank")
         }
-        val created = service.createSession(req?.invitationId, sessionTtlSeconds)
+        val created = service.createSession(req?.invitationId, props.sessionTtlSeconds)
         return CreateTelegramSessionResponse(
             sid = created.sid,
-            deeplinkUrl = "https://t.me/$botUsername?start=${created.sid}",
+            deeplinkUrl = "https://t.me/${props.botUsername}?start=${created.sid}",
             expiresIn = created.expiresIn,
         )
     }
 }
-

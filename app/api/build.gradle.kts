@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":app:libs:config"))
     implementation(project(":app:service"))
     implementation(project(":app:data"))
 
@@ -17,7 +18,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.mockito:mockito-inline:5.2.0") // вместо mockito-core
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 }
 
 tasks.withType<Test> {

@@ -8,3 +8,4 @@ include(
     "app:application",
 )
 include("app:libs:exceptionhandler")
+include("app:libs:config")
