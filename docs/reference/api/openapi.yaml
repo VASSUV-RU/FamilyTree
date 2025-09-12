@@ -1,0 +1,704 @@
+openapi: 3.0.3
+info:
+  title: Family-Tree API
+  version: 0.1.0
+  description: |
+    Draft OpenAPI based on current guides.
+    Security: bearer access token (JWT). Refresh via httpOnly cookie.
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Auth
+  - name: Me
+  - name: Families
+  - name: Members
+  - name: Invites
+  - name: Sources
+  - name: Media
+  - name: Genealogy
+paths:
+  /auth/telegram/session:
+    post:
+      tags: [Auth]
+      summary: Create pending session and return deep-link
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTelegramSessionRequest'
+      responses:
+        '200':
+          description: Created pending session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTelegramSessionResponse'
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/telegram/session/{sid}:
+    get:
+      tags: [Auth]
+      summary: Poll pending session status or receive AuthResponse
+      parameters:
+        - name: sid
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Status or AuthResponse
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PendingSessionStatus'
+                  - $ref: '#/components/schemas/PendingSessionReady'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '410': { description: Gone }
+        '409': { $ref: '#/components/responses/Conflict' }
+  
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Issue new access token by refresh cookie
+      security:
+        - refreshCookie: []
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current session
+      responses:
+        '204': { description: No Content }
+  /me/active-family:
+    post:
+      tags: [Me]
+      summary: Switch active family and recalc permissions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveFamilyRequest'
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /families:
+    post:
+      tags: [Families]
+      summary: Create family
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateFamilyRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Family' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    get:
+      tags: [Families]
+      summary: List families of current user (optional)
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Family' }
+  /families/{id}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Families]
+      summary: Get family by id
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Family' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Families]
+      summary: Update family
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateFamilyRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Family' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    delete:
+      tags: [Families]
+      summary: Delete family
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+
+  /families/{id}/members:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Members]
+      summary: List members
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Member' }
+  /families/{id}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [Members]
+      summary: Update member role/status
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MemberUpdateRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Member' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Members]
+      summary: Remove member
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+
+  /families/{id}/invites:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Invites]
+      summary: List family invites
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Invitation' } } } } }
+    post:
+      tags: [Invites]
+      summary: Create invite
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateInviteRequest' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Invitation' } } } }
+  /families/{id}/invites/{inviteId}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+      - name: inviteId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Invites]
+      summary: Revoke invite
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+  /invites/{token}/accept:
+    post:
+      tags: [Invites]
+      summary: Accept invite by token (bot)
+      requestBody: { required: false }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/AcceptInviteResponse' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /families/{id}/sources:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Sources]
+      summary: List sources
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Source' } } } } }
+    post:
+      tags: [Sources]
+      summary: Create source
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSourceRequest' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Source' } } } }
+  /families/{id}/sources/{sourceId}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+      - name: sourceId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [Sources]
+      summary: Update source
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateSourceRequest' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Source' } } } }
+    delete:
+      tags: [Sources]
+      summary: Delete source
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+
+  /families/{id}/media:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Media]
+      summary: List media items
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/MediaItem' } } } } }
+  /media/{mediaId}:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Media]
+      summary: Get media item
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MediaItem' } } } }
+  /media/{mediaId}/download-link:
+    post:
+      tags: [Media]
+      summary: Issue short-lived external download link/token
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/MediaDownloadLinkResponse' } } } }
+  /media/{mediaId}/comments:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Media]
+      summary: List comments
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Comment' } } } } }
+    post:
+      tags: [Media]
+      summary: Create comment
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CommentCreateRequest' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Comment' } } } }
+  /media/{mediaId}/comments/{commentId}:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: { type: string }
+      - name: commentId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Media]
+      summary: Delete comment
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+  /media/{mediaId}/tags:
+    post:
+      tags: [Media]
+      summary: Add person tag (optional in MVP)
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TagCreateRequest' }
+      responses:
+        '201': { description: Created }
+  /media/{mediaId}/tags/{tagId}:
+    delete:
+      tags: [Media]
+      summary: Remove person tag
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: tagId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: No Content }
+
+  /families/{id}/tree:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    get:
+      tags: [Genealogy]
+      summary: Get family tree (persons + relations)
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TreeResponse' } } } }
+  /families/{id}/persons:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    post:
+      tags: [Genealogy]
+      summary: Create person
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Person' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Person' } } } }
+  /families/{id}/persons/{personId}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+      - name: personId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [Genealogy]
+      summary: Update person
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Person' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Person' } } } }
+    delete:
+      tags: [Genealogy]
+      summary: Delete person
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+  /families/{id}/relations:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+    post:
+      tags: [Genealogy]
+      summary: Create relation
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Relation' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Relation' } } } }
+  /families/{id}/relations/{relationId}:
+    parameters:
+      - $ref: '#/components/parameters/FamilyId'
+      - name: relationId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [Genealogy]
+      summary: Update relation
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Relation' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Relation' } } } }
+    delete:
+      tags: [Genealogy]
+      summary: Delete relation
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: No Content }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+  parameters:
+    FamilyId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    BadRequest:
+      description: Bad Request
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: Unauthorized
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Forbidden
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Not Found
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: Conflict
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    TooManyRequests:
+      description: Too Many Requests
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+    CreateTelegramSessionRequest:
+      type: object
+      properties:
+        invitationId: { type: string }
+    CreateTelegramSessionResponse:
+      type: object
+      properties:
+        sid: { type: string }
+        deeplinkUrl: { type: string }
+        expiresIn: { type: integer }
+      required: [sid, deeplinkUrl, expiresIn]
+    PendingSessionStatus:
+      type: object
+      properties:
+        status: { type: string, enum: [pending] }
+    PendingSessionReady:
+      type: object
+      properties:
+        status: { type: string, enum: [ready] }
+        auth: { $ref: '#/components/schemas/AuthResponse' }
+      required: [status, auth]
+    AuthResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        expiresIn: { type: integer }
+        user:
+          type: object
+          properties:
+            id: { type: string }
+            name: { type: string }
+        activeFamilyId: { type: string }
+        scopes:
+          type: array
+          items: { type: string }
+        refreshTokenSet: { type: boolean }
+      required: [accessToken, expiresIn]
+    ActiveFamilyRequest:
+      type: object
+      properties:
+        familyId: { type: string }
+      required: [familyId]
+    Family:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        ownerId: { type: string }
+        createdAt: { type: integer }
+      required: [id, name]
+    CreateFamilyRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+      required: [name]
+    UpdateFamilyRequest:
+      type: object
+      properties:
+        name: { type: string }
+    Member:
+      type: object
+      properties:
+        userId: { type: string }
+        familyId: { type: string }
+        role: { type: string, enum: [owner, admin, member, guest] }
+        status: { type: string, enum: [active, invited] }
+        personId: { type: string, nullable: true }
+      required: [userId, familyId, role, status]
+    MemberUpdateRequest:
+      type: object
+      properties:
+        role: { type: string, enum: [owner, admin, member, guest] }
+        status: { type: string, enum: [active, invited] }
+    Invitation:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        inviterId: { type: string }
+        contact: { type: string }
+        role: { type: string }
+        personId: { type: string, nullable: true }
+        expiresAt: { type: integer }
+        status: { type: string, enum: [pending, accepted, revoked] }
+      required: [id, familyId, role, status]
+    CreateInviteRequest:
+      type: object
+      properties:
+        contact: { type: string }
+        role: { type: string, enum: [owner, admin, member, guest] }
+        personId: { type: string }
+      required: [contact, role]
+    AcceptInviteResponse:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        role: { type: string }
+        personId: { type: string, nullable: true }
+        status: { type: string, enum: [accepted] }
+    Source:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        type: { type: string, enum: [telegram, yandex_disk, s3, other] }
+        createdAt: { type: integer }
+      required: [id, familyId, type]
+    CreateSourceRequest:
+      type: object
+      properties:
+        type: { type: string }
+        config: { type: object }
+      required: [type]
+    UpdateSourceRequest:
+      type: object
+      properties:
+        config: { type: object }
+    MediaItem:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        sourceId: { type: string }
+        type: { type: string, enum: [photo, video, doc] }
+        createdAt: { type: integer }
+        metadata: { type: object }
+      required: [id, familyId, sourceId, type]
+    MediaDownloadLinkResponse:
+      type: object
+      properties:
+        url: { type: string }
+        expiresIn: { type: integer }
+    Comment:
+      type: object
+      properties:
+        id: { type: string }
+        mediaId: { type: string }
+        authorId: { type: string }
+        text: { type: string }
+        createdAt: { type: integer }
+      required: [id, mediaId, authorId, text]
+    CommentCreateRequest:
+      type: object
+      properties:
+        text: { type: string }
+      required: [text]
+    TagCreateRequest:
+      type: object
+      properties:
+        personId: { type: string }
+      required: [personId]
+    Person:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        name: { type: string }
+        birthDate: { type: string, format: date, nullable: true }
+        deathDate: { type: string, format: date, nullable: true }
+        meta: { type: object, nullable: true }
+      required: [name]
+    Relation:
+      type: object
+      properties:
+        id: { type: string }
+        familyId: { type: string }
+        type: { type: string, enum: [parent, spouse, sibling, child, other] }
+        fromPersonId: { type: string }
+        toPersonId: { type: string }
+        meta: { type: object, nullable: true }
+      required: [type, fromPersonId, toPersonId]
+    TreeResponse:
+      type: object
+      properties:
+        persons:
+          type: array
+          items: { $ref: '#/components/schemas/Person' }
+        relations:
+          type: array
+          items: { $ref: '#/components/schemas/Relation' }

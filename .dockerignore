@@ -1,0 +1,9 @@
+.git
+.gitignore
+.idea
+**/.gradle
+**/build
+**/out
+**/.DS_Store
+**/application-local.yml
+

@@ -1,0 +1,16 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+out/
+
+# OS
+.DS_Store
+
+# Local configs / secrets
+**/application-local.yml
+

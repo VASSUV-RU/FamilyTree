@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+     http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="2025-09-08-002-add-idx-persons-name" author="vassuv" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_persons_last_first" tableName="persons"/>
+            </not>
+        </preConditions>
+
+        <createIndex indexName="idx_persons_last_first" tableName="persons">
+            <column name="last_name"/>
+            <column name="first_name"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_persons_last_first" tableName="persons"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

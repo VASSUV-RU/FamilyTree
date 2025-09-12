@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Подключаем ВСЕ файлы миграций 2025 года по порядку -->
+    <include file="db/changelog/2025/2025-09-08-001-create-persons.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/2025/2025-09-08-002-add-idx-persons-name.xml" relativeToChangelogFile="false"/>
+
+    <!-- Можно и includeAll, но явные include лучше контролируют порядок -->
+    <!-- <includeAll path="db/changelog/2025" relativeToChangelogFile="false"/> -->
+</databaseChangeLog>

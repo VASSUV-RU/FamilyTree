@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: familytree-db
+    environment:
+      POSTGRES_DB: familytree
+      POSTGRES_USER: family
+      POSTGRES_PASSWORD: family
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U family -d familytree"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: familytree-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/familytree
+      SPRING_DATASOURCE_USERNAME: family
+      SPRING_DATASOURCE_PASSWORD: family
+      # For local/dev: create/update schema automatically
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # Optional extra JVM opts
+      JAVA_OPTS: -Xms256m -Xmx512m
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata: {}
+

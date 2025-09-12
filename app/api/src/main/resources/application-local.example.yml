@@ -1,0 +1,8 @@
+# Copy to application-local.yml and adjust secrets locally
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/familytree
+    username: family
+    password: family
+  jpa:
+    show-sql: true

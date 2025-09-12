@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: family-tree-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/familytree
+    username: family
+    password: family
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.format_sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+  profiles:
+    include: local
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  port: 8080
+
