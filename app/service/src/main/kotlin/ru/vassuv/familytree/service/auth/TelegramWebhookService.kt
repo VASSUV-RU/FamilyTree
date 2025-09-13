@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.vassuv.familytree.config.exception.UnauthorizeException
 import ru.vassuv.familytree.data.auth.pending.MarkReadyResult
+import ru.vassuv.familytree.data.auth.pending.AuthPayload
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import java.time.Instant
@@ -35,16 +36,16 @@ class TelegramWebhookService(
         val userId = existing.userId ?: "u:tg:${tg.id}"
         val jti = UUID.randomUUID().toString()
         val access = "access-" + jti
-        val payload = mapOf(
-            "jti" to jti,
-            "accessToken" to access,
-            "refreshToken" to jti,
-            "userId" to userId,
-            "telegramId" to tg.id,
-            "username" to tg.username,
-            "firstName" to tg.firstName,
-            "lastName" to tg.lastName,
-            "issuedAt" to Instant.now().epochSecond,
+        val payload = AuthPayload(
+            jti = jti,
+            accessToken = access,
+            refreshToken = jti,
+            userId = userId,
+            telegramId = tg.id,
+            username = tg.username,
+            firstName = tg.firstName,
+            lastName = tg.lastName,
+            issuedAt = Instant.now().epochSecond,
         )
 
         return when (val res = pendingRepo.markReady(sid, payload, userId)) {

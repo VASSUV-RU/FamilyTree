@@ -18,6 +18,7 @@ import ru.vassuv.familytree.api.controller.TelegramController
 import ru.vassuv.familytree.config.TelegramAuthProperties
 import ru.vassuv.familytree.data.auth.pending.MarkUsedResult
 import ru.vassuv.familytree.service.auth.PollDelivery
+import ru.vassuv.familytree.data.auth.pending.AuthPayload
 import ru.vassuv.familytree.service.auth.TelegramService
 import ru.vassuv.familytree.service.model.CreatedTelegramSession
 
@@ -71,7 +72,19 @@ class TelegramControllerTest {
   @Test
   fun poll_session_ready_returns_auth_without_cookie() {
     whenever(service.awaitLoginSession("Sabc")).thenReturn(
-      PollDelivery.Ready(auth = mapOf("accessToken" to "acc-1", "refreshToken" to "rid-1", "userId" to "u1"), refreshValue = "rid-1")
+      PollDelivery.Ready(
+        auth = AuthPayload(
+          jti = "jid-1",
+          accessToken = "acc-1",
+          refreshToken = "rid-1",
+          userId = "u1",
+          telegramId = 12345,
+          username = "john",
+          firstName = null,
+          lastName = null,
+          issuedAt = 0,
+        )
+      )
     )
 
     mvc.perform(get("/auth/telegram/session/Sabc")).andExpect(status().isOk)

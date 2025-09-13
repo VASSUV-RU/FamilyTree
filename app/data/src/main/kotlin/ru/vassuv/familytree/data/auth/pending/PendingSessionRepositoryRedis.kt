@@ -54,7 +54,7 @@ class PendingSessionRepositoryRedis(
         }
     }
 
-    override fun markReady(sid: String, authPayload: Map<String, Any?>, userId: String?): MarkReadyResult {
+    override fun markReady(sid: String, authPayload: AuthPayload, userId: String?): MarkReadyResult {
         val statusKey = keyStatus(sid)
         val dataKey = keyData(sid)
         return redis.execute { connection ->

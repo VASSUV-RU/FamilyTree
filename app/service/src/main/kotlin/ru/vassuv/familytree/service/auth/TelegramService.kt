@@ -6,6 +6,7 @@ import ru.vassuv.familytree.config.exception.goneError
 import ru.vassuv.familytree.config.exception.notFoundError
 import kotlin.math.min
 import ru.vassuv.familytree.data.auth.pending.MarkUsedResult
+import ru.vassuv.familytree.data.auth.pending.AuthPayload
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus.PENDING
@@ -16,7 +17,7 @@ import ru.vassuv.familytree.service.model.CreatedTelegramSession
 
 sealed interface PollDelivery {
   object Pending : PollDelivery
-  data class Ready(val auth: Map<String, Any?>, val refreshValue: String) : PollDelivery
+  data class Ready(val auth: AuthPayload) : PollDelivery
 }
 
 @Service
@@ -55,12 +56,9 @@ class TelegramService(
         }
         USED -> conflictError("Session is already used")
         READY -> {
-          val auth = session.auth ?: emptyMap()
-          val refresh = (auth["refreshToken"] as? String)
-            ?: (auth["refresh"] as? String)
-            ?: (auth["jti"] as? String) ?: ""
+          val auth = session.auth ?: conflictError("Missing auth payload")
           markUsed(sid)
-          return PollDelivery.Ready(auth = auth, refreshValue = refresh)
+          return PollDelivery.Ready(auth = auth)
         }
       }
     }
