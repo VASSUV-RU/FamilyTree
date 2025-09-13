@@ -4,11 +4,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.vassuv.familytree.config.exception.UnauthorizeException
 import ru.vassuv.familytree.data.auth.pending.MarkReadyResult
-import ru.vassuv.familytree.data.auth.pending.AuthPayload
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
-import java.time.Instant
-import java.util.UUID
 
 data class TelegramUserInfo(
     val id: Long,
@@ -32,23 +29,8 @@ class TelegramWebhookService(
         val existing: PendingSessionRecord = pendingRepo.get(sid)
             ?: return WebhookConfirmResult(false, "Session not found or expired")
 
-        // Prepare minimal auth payload; tokens and invites will be added in later tasks
-        val userId = existing.userId ?: "u:tg:${tg.id}"
-        val jti = UUID.randomUUID().toString()
-        val access = "access-" + jti
-        val payload = AuthPayload(
-            jti = jti,
-            accessToken = access,
-            refreshToken = jti,
-            userId = userId,
-            telegramId = tg.id,
-            username = tg.username,
-            firstName = tg.firstName,
-            lastName = tg.lastName,
-            issuedAt = Instant.now().epochSecond,
-        )
-
-        return when (val res = pendingRepo.markReady(sid, payload, userId)) {
+        // Mark session ready with minimal info (telegramId); tokens are issued later
+        return when (val res = pendingRepo.markReady(sid, tg.id)) {
             is MarkReadyResult.Ok -> WebhookConfirmResult(true, "Session confirmed. You can return to app.")
             is MarkReadyResult.AlreadyReady -> WebhookConfirmResult(true, "Already confirmed. You can return to app.")
             is MarkReadyResult.AlreadyUsed -> WebhookConfirmResult(false, "Session already used")

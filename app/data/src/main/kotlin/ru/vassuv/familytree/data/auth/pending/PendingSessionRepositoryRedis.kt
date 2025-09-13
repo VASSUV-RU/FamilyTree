@@ -54,7 +54,7 @@ class PendingSessionRepositoryRedis(
         }
     }
 
-    override fun markReady(sid: String, authPayload: AuthPayload, userId: String?): MarkReadyResult {
+    override fun markReady(sid: String, telegramId: Long): MarkReadyResult {
         val statusKey = keyStatus(sid)
         val dataKey = keyData(sid)
         return redis.execute { connection ->
@@ -75,7 +75,7 @@ class PendingSessionRepositoryRedis(
             } catch (_: Exception) {
                 PendingSessionRecord(sid = sid, status = PendingSessionStatus.PENDING, createdAt = Instant.now().epochSecond)
             }
-            val updated = rec.copy(status = PendingSessionStatus.READY, userId = userId ?: rec.userId, auth = authPayload)
+            val updated = rec.copy(status = PendingSessionStatus.READY, telegramId = telegramId, confirmedAt = Instant.now().epochSecond)
 
             connection.multi()
             connection.stringCommands().set(sk, ser.serialize(PendingSessionStatus.READY.name)!!)

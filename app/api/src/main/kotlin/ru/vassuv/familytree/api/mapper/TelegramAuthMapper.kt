@@ -21,8 +21,8 @@ class TelegramAuthMapper {
         return when (delivery) {
             is PollDelivery.Pending -> AwaitTelegramSessionResponse(status = "pending", auth = null)
             is PollDelivery.Ready -> {
-                val access = delivery.auth.accessToken
-                val refresh = delivery.auth.refreshToken
+                val access = delivery.tokens.accessToken
+                val refresh = delivery.tokens.refreshToken
                 AwaitTelegramSessionResponse(status = "ready", auth = AuthTokensResponse(accessToken = access, refreshToken = refresh))
             }
         }
