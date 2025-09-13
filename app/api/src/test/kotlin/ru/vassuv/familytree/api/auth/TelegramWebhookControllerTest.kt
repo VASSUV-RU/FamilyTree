@@ -15,12 +15,12 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import ru.vassuv.familytree.api.controller.TelegramWebhookController
+import ru.vassuv.familytree.api.controller.TelegramController
 import ru.vassuv.familytree.config.TelegramAuthProperties
-import ru.vassuv.familytree.service.auth.TelegramWebhookService
+import ru.vassuv.familytree.service.auth.TelegramService
 import ru.vassuv.familytree.service.auth.WebhookConfirmResult
 
-@WebMvcTest(TelegramWebhookController::class)
+@WebMvcTest(TelegramController::class)
 @EnableConfigurationProperties(TelegramAuthProperties::class)
 @TestPropertySource(
     properties = ["auth.telegram.bot-username=test_bot", "auth.telegram.session-ttl-seconds=300", "auth.telegram.webhook-secret=secret123"]
@@ -31,7 +31,7 @@ class TelegramWebhookControllerTest {
     lateinit var mvc: MockMvc
 
     @MockitoBean
-    lateinit var service: TelegramWebhookService
+    lateinit var service: TelegramService
 
     private fun updateJson(text: String): String = """
         {

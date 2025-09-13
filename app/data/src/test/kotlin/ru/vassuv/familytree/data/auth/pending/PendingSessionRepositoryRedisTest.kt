@@ -64,7 +64,7 @@ class PendingSessionRepositoryRedisTest {
         TimeUnit.SECONDS.sleep(2)
         val loaded = repo.get(sid)
         assertNull(loaded)
-        val res = repo.markReady(sid, AuthPayload(jti = "j", accessToken = "a", refreshToken = "r", userId = "u"), null)
+        val res = repo.markReady(sid, loaded?.telegramId ?: 0L)
         assertEquals(MarkReadyResult.NotFound, res)
     }
 

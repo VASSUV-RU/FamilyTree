@@ -14,7 +14,16 @@ import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus
 
 class TelegramWebhookServiceTest {
 
-    private fun serviceWith(repo: PendingSessionRepository) = TelegramWebhookService(repo)
+    private fun serviceWith(repo: PendingSessionRepository): TelegramService {
+        val sidGen = object : ru.vassuv.familytree.service.auth.pending.SidGenerator() {
+            override fun generate(byteLength: Int, prefix: String): String = "S"
+        }
+        val tokenSvc = object : TokenService {
+            override fun issueForTelegram(telegramId: Long, invitationId: String?) =
+                ru.vassuv.familytree.service.model.AuthTokens("a","r")
+        }
+        return TelegramService(repo, sidGen, tokenSvc)
+    }
 
     private val sid = "Sabc"
     private val tg = TelegramUserInfo(id = 1, username = "u", firstName = "f", lastName = "l")

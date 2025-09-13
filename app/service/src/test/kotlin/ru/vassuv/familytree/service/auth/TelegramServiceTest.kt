@@ -20,7 +20,8 @@ class TelegramServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = "Sfixed1"
         }
-        val service = TelegramService(repo, sidGen)
+        val tokenService: TokenService = mock()
+        val service = TelegramService(repo, sidGen, tokenService)
 
         whenever(
             repo.create(
@@ -42,7 +43,8 @@ class TelegramServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sfirst" else "Ssecond"
         }
-        val service = TelegramService(repo, sidGen)
+        val tokenService: TokenService = mock()
+        val service = TelegramService(repo, sidGen, tokenService)
 
         whenever(
             repo.create(
@@ -67,11 +69,12 @@ class TelegramServiceTest {
     @Test
     fun `createSession fails after two attempts`() {
         val repo: PendingSessionRepository = mock()
+        val tokenService: TokenService = mock()
         var counter = 0
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sa" else "Sb"
         }
-        val service = TelegramService(repo, sidGen)
+        val service = TelegramService(repo, sidGen, tokenService)
 
         whenever(
             repo.create(
