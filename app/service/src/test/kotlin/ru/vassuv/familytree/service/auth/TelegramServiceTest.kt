@@ -12,7 +12,7 @@ import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus
 import ru.vassuv.familytree.service.auth.pending.SidGenerator
 
-class TelegramSessionServiceTest {
+class TelegramServiceTest {
 
     @Test
     fun `createSession succeeds on first attempt`() {
@@ -20,12 +20,12 @@ class TelegramSessionServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = "Sfixed1"
         }
-        val service = TelegramSessionService(repo, sidGen)
+        val service = TelegramService(repo, sidGen)
 
         whenever(
             repo.create(
                 eq("Sfixed1"),
-                eq(PendingSessionRecord("Sfixed1", PendingSessionStatus.pending, invitationId = null)),
+                eq(PendingSessionRecord("Sfixed1", PendingSessionStatus.PENDING, invitationId = null)),
                 eq(300L)
             )
         ).thenReturn(true)
@@ -42,19 +42,19 @@ class TelegramSessionServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sfirst" else "Ssecond"
         }
-        val service = TelegramSessionService(repo, sidGen)
+        val service = TelegramService(repo, sidGen)
 
         whenever(
             repo.create(
                 eq("Sfirst"),
-                eq(PendingSessionRecord("Sfirst", PendingSessionStatus.pending, invitationId = "inv-1")),
+                eq(PendingSessionRecord("Sfirst", PendingSessionStatus.PENDING, invitationId = "inv-1")),
                 eq(120L)
             )
         ).thenReturn(false)
         whenever(
             repo.create(
                 eq("Ssecond"),
-                eq(PendingSessionRecord("Ssecond", PendingSessionStatus.pending, invitationId = "inv-1")),
+                eq(PendingSessionRecord("Ssecond", PendingSessionStatus.PENDING, invitationId = "inv-1")),
                 eq(120L)
             )
         ).thenReturn(true)
@@ -71,7 +71,7 @@ class TelegramSessionServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sa" else "Sb"
         }
-        val service = TelegramSessionService(repo, sidGen)
+        val service = TelegramService(repo, sidGen)
 
         whenever(
             repo.create(

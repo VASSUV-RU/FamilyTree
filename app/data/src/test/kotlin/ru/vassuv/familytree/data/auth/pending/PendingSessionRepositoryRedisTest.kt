@@ -14,11 +14,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import ru.vassuv.familytree.data.auth.pending.MarkReadyResult
-import ru.vassuv.familytree.data.auth.pending.MarkUsedResult
-import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
-import ru.vassuv.familytree.data.auth.pending.PendingSessionRepositoryRedis
-import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus
 
 @Testcontainers
 class PendingSessionRepositoryRedisTest {
@@ -46,26 +41,26 @@ class PendingSessionRepositoryRedisTest {
     @Test
     fun `create and get pending session`() {
         val sid = newSid()
-        val ok = repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending, invitationId = "inv-1"), 5)
+        val ok = repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING, invitationId = "inv-1"), 5)
         assertTrue(ok)
 
         val loaded = repo.get(sid)
         assertNotNull(loaded)
-        assertEquals(PendingSessionStatus.pending, loaded!!.status)
+        assertEquals(PendingSessionStatus.PENDING, loaded!!.status)
         assertEquals("inv-1", loaded.invitationId)
     }
 
     @Test
     fun `create same sid returns false`() {
         val sid = "Sfixed"
-        assertTrue(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending), 5))
-        assertFalse(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending), 5))
+        assertTrue(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 5))
+        assertFalse(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 5))
     }
 
     @Test
     fun `ttl expiration removes session`() {
         val sid = newSid()
-        assertTrue(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending), 1))
+        assertTrue(repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 1))
         TimeUnit.SECONDS.sleep(2)
         val loaded = repo.get(sid)
         assertNull(loaded)
@@ -76,7 +71,7 @@ class PendingSessionRepositoryRedisTest {
     @Test
     fun `markReady idempotent and markUsed flow`() {
         val sid = newSid()
-        repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending), 10)
+        repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 10)
         val r1 = repo.markReady(sid, mapOf("token" to "x"), userId = "u-1")
         assertEquals(MarkReadyResult.Ok, r1)
 
@@ -100,7 +95,7 @@ class PendingSessionRepositoryRedisTest {
     @Test
     fun `concurrent markReady yields conflict for one`() {
         val sid = newSid()
-        repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.pending), 10)
+        repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 10)
 
         val pool = Executors.newFixedThreadPool(2)
         val latch = CountDownLatch(1)

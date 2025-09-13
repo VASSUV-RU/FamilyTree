@@ -2,7 +2,7 @@ package ru.vassuv.familytree.data.auth.pending
 
 import java.time.Instant
 
-enum class PendingSessionStatus { pending, ready, used }
+enum class PendingSessionStatus { PENDING, READY, USED }
 
 data class PendingSessionRecord(
     val sid: String,
@@ -13,18 +13,18 @@ data class PendingSessionRecord(
     val auth: Map<String, Any?>? = null,
 )
 
-sealed class MarkReadyResult {
-    object Ok : MarkReadyResult()
-    object NotFound : MarkReadyResult()
-    object AlreadyReady : MarkReadyResult()
-    object AlreadyUsed : MarkReadyResult()
-    object Conflict : MarkReadyResult()
+sealed interface MarkReadyResult {
+    object Ok : MarkReadyResult
+    object NotFound : MarkReadyResult
+    object AlreadyReady : MarkReadyResult
+    object AlreadyUsed : MarkReadyResult
+    object Conflict : MarkReadyResult
 }
 
-sealed class MarkUsedResult {
-    object Ok : MarkUsedResult()
-    object NotFound : MarkUsedResult()
-    object Conflict : MarkUsedResult()
+sealed interface MarkUsedResult {
+    object Ok : MarkUsedResult
+    object NotFound : MarkUsedResult
+    object Conflict : MarkUsedResult
 }
 
 interface PendingSessionRepository {
@@ -32,5 +32,5 @@ interface PendingSessionRepository {
     fun get(sid: String): PendingSessionRecord?
     fun markReady(sid: String, authPayload: Map<String, Any?>, userId: String?): MarkReadyResult
     fun markUsed(sid: String): MarkUsedResult
+    fun isKnown(sid: String): Boolean
 }
-

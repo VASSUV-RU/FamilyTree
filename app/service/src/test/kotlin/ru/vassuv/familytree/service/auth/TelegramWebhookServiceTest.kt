@@ -32,7 +32,7 @@ class TelegramWebhookServiceTest {
     @Test
     fun `ok when markReady returns Ok`() {
         val repo: PendingSessionRepository = mock()
-        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.pending))
+        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any(), anyOrNull())).thenReturn(MarkReadyResult.Ok)
         val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
@@ -42,7 +42,7 @@ class TelegramWebhookServiceTest {
     @Test
     fun `ok when AlreadyReady`() {
         val repo: PendingSessionRepository = mock()
-        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.ready))
+        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.READY))
         whenever(repo.markReady(eq(sid), any(), anyOrNull())).thenReturn(MarkReadyResult.AlreadyReady)
         val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
@@ -52,7 +52,7 @@ class TelegramWebhookServiceTest {
     @Test
     fun `false when AlreadyUsed`() {
         val repo: PendingSessionRepository = mock()
-        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.used))
+        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.USED))
         whenever(repo.markReady(eq(sid), any(), anyOrNull())).thenReturn(MarkReadyResult.AlreadyUsed)
         val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
@@ -63,7 +63,7 @@ class TelegramWebhookServiceTest {
     @Test
     fun `false when Conflict`() {
         val repo: PendingSessionRepository = mock()
-        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.pending))
+        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any(), anyOrNull())).thenReturn(MarkReadyResult.Conflict)
         val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
@@ -73,7 +73,7 @@ class TelegramWebhookServiceTest {
     @Test
     fun `false when NotFound during markReady`() {
         val repo: PendingSessionRepository = mock()
-        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.pending))
+        whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any(), anyOrNull())).thenReturn(MarkReadyResult.NotFound)
         val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)

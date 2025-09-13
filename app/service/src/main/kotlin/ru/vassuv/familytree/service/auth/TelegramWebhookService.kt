@@ -2,6 +2,7 @@ package ru.vassuv.familytree.service.auth
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import ru.vassuv.familytree.config.exception.UnauthorizeException
 import ru.vassuv.familytree.data.auth.pending.MarkReadyResult
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
@@ -33,8 +34,11 @@ class TelegramWebhookService(
         // Prepare minimal auth payload; tokens and invites will be added in later tasks
         val userId = existing.userId ?: "u:tg:${tg.id}"
         val jti = UUID.randomUUID().toString()
+        val access = "access-" + jti
         val payload = mapOf(
             "jti" to jti,
+            "accessToken" to access,
+            "refreshToken" to jti,
             "userId" to userId,
             "telegramId" to tg.id,
             "username" to tg.username,
@@ -54,5 +58,17 @@ class TelegramWebhookService(
             }
         }
     }
-}
 
+    fun parseStartSid(text: String): String? {
+        val t = text.trim()
+        if (!t.startsWith("/start")) return null
+        val parts = t.split(Regex("\\s+"))
+        return if (parts.size >= 2) parts[1] else null
+    }
+
+    fun validateSecretOrThrow(provided: String?, expected: String) {
+        if (expected.isBlank() || provided == null || provided != expected) {
+            throw UnauthorizeException()
+        }
+    }
+}

@@ -29,7 +29,7 @@
 3. Пользователь кликает ссылку, в Telegram нажимает Start/Confirm.
 4. Telegram шлёт webhook на наш сервер (`POST /telegram/webhook`), бот‑хендлер видит `/start <sid>` и вызывает внутренний сервис подтверждения (без отдельного HTTP‑вызова).
 5. Бэкенд помечает `sid` как подтверждённый, создаёт/обновляет пользователя и сессию, при наличии инвайта — принимает его и определяет активную семью.
-6. Фронт опрашивает `GET /auth/telegram/session/{sid}` (LongPolling/SSE) и получает `AuthResponse` (access‑JWT + refresh‑cookie).
+6. Фронт вызывает `GET /auth/telegram/session/{sid}` и ожидает до таймаута. При готовности сервер возвращает `AuthResponse` c `accessToken` и `refreshToken`.
 
 Варианты:
 - Новый владелец семьи — `invitationId` не передан: создаётся семья, роль `owner`.
@@ -71,9 +71,9 @@
 Ошибки: `429 TOO_MANY_ATTEMPTS`.
 
 ### 4.2 `GET /auth/telegram/session/{sid}`
-Проверяет статус «ожидающей сессии»; при готовности возвращает `AuthResponse`.
+Ожидает подтверждение «ожидающей сессии» и при готовности возвращает `AuthResponse`.
 
-Ответ (ожидание):
+Ответ (ожидание/таймаут):
 
 ```json
 { "status": "pending" }
@@ -82,7 +82,7 @@
 Ответ (успех):
 
 ```json
-{ "status": "ready", "auth": { /* AuthResponse */ } }
+{ "status": "ready", "auth": { "accessToken": "...", "refreshToken": "..." } }
 ```
 
 Ошибки: `404 NOT_FOUND`, `410 GONE` (истёк), `409 ALREADY_USED`.

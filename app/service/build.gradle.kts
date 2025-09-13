@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":app:data"))
+    implementation(project(":app:libs:config"))
     implementation("org.springframework.boot:spring-boot-starter")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -78,12 +78,16 @@ class TelegramWebhookControllerTest {
 
     @Test
     fun webhook_unauthorized_on_bad_secret() {
+        whenever(service.validateSecretOrThrow(eq("bad"), eq("secret123")))
+            .thenAnswer { throw ru.vassuv.familytree.config.exception.UnauthorizeException() }
+
         mvc.perform(
             post("/auth/telegram/webhook").contentType(MediaType.APPLICATION_JSON)
                 .header("X-Telegram-Bot-Api-Secret-Token", "bad").content(updateJson("/start Sabc"))
         ).andExpect(status().isUnauthorized)
 
-        Mockito.verifyNoInteractions(service)
+        // confirmStart should not be called
+        Mockito.verify(service, Mockito.never()).confirmStart(any(), any())
     }
 
     @Test
@@ -104,7 +108,8 @@ class TelegramWebhookControllerTest {
                 .header("X-Telegram-Bot-Api-Secret-Token", "secret123").content(updateJson("hello"))
         ).andExpect(status().isOk).andExpect(jsonPath("$.ok").value(true))
 
-        Mockito.verifyNoInteractions(service)
+        // confirmStart should not be called for non-start message
+        Mockito.verify(service, Mockito.never()).confirmStart(any(), any())
     }
 
     @Test
@@ -119,7 +124,8 @@ class TelegramWebhookControllerTest {
                 .header("X-Telegram-Bot-Api-Secret-Token", "secret123").content(updateJsonNoFrom("/start Sabc"))
         ).andExpect(status().isOk).andExpect(jsonPath("$.ok").value(true))
 
-        Mockito.verifyNoInteractions(service)
+        // confirmStart should not be called
+        Mockito.verify(service, Mockito.never()).confirmStart(any(), any())
     }
 
     @Test

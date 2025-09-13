@@ -1,4 +1,4 @@
-package ru.vassuv.familytree.api.controller.dto.request.telegram
+package ru.vassuv.familytree.api.dto.request.telegram
 
 data class TelegramUpdate(
     val update_id: Long? = null,

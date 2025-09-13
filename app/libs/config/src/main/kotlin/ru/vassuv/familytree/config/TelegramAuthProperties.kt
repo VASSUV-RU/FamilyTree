@@ -12,4 +12,3 @@ data class TelegramAuthProperties(
     @field:Positive val sessionTtlSeconds: Long = 300,
     val webhookSecret: String = "",
 )
-

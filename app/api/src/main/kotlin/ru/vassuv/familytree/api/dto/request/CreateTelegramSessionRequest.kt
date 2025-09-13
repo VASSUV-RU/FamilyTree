@@ -1,4 +1,4 @@
-package ru.vassuv.familytree.api.controller.dto.request
+package ru.vassuv.familytree.api.dto.request
 
 data class CreateTelegramSessionRequest(
     val invitationId: String? = null,

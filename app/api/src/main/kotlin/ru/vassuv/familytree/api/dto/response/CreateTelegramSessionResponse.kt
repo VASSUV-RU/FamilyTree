@@ -1,4 +1,4 @@
-package ru.vassuv.familytree.api.controller.dto.response
+package ru.vassuv.familytree.api.dto.response
 
 data class CreateTelegramSessionResponse(
     val sid: String,
