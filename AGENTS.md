@@ -18,6 +18,12 @@
 - Docker Compose (локально): `cp .env.example .env && docker compose up --build`
 - Профили: локально активируем `local` (через `SPRING_PROFILES_ACTIVE=local` или .env)
 
+Заметки по миграциям БД
+- Миграции Liquibase хранятся в модуле `app/data` в `src/main/resources/db/changelog`.
+- Главный файл: `db/changelog/db.changelog-master.xml` (classpath), подключается из `application.yml` через `spring.liquibase.change-log`.
+- Сами миграции группируются в папках по годам. И имеют названия например - [2025-09-08-001-create-persons.xml](app/data/src/main/resources/db/changelog/2025/2025-09-08-001-create-persons.xml)
+- Модуль `application` не содержит миграций — добавляйте/правьте их в `app/data`.
+
 Переменные окружения (локально через `.env`):
 - `BOT_USERNAME`, `TELEGRAM_SESSION_TTL`, `TELEGRAM_WEBHOOK_SECRET`
 - БД: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`

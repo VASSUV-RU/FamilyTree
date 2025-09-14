@@ -9,6 +9,7 @@
     <!-- Подключаем ВСЕ файлы миграций 2025 года по порядку -->
     <include file="db/changelog/2025/2025-09-08-001-create-persons.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/2025/2025-09-08-002-add-idx-persons-name.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/2025/2025-09-14-003-auth-sessions.xml" relativeToChangelogFile="false"/>
 
     <!-- Можно и includeAll, но явные include лучше контролируют порядок -->
     <!-- <includeAll path="db/changelog/2025" relativeToChangelogFile="false"/> -->

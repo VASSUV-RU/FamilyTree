@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+     http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="2025-09-14-003-auth-sessions" author="vassuv">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sessions"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="sessions">
+            <column name="jti" type="VARCHAR(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_family_id" type="BIGINT"/>
+            <column name="scopes" type="TEXT"/>
+            <column name="cap_version" type="INT" defaultValueNumeric="1"/>
+            <column name="issued_at" type="TIMESTAMP"/>
+            <column name="expires_at" type="TIMESTAMP"/>
+            <column name="status" type="VARCHAR(16)"/>
+            <column name="meta" type="TEXT"/>
+        </createTable>
+
+        <createIndex tableName="sessions" indexName="idx_sessions_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="sessions" indexName="idx_sessions_expires_at">
+            <column name="expires_at"/>
+        </createIndex>
+
+        <createTable tableName="refresh_tokens">
+            <column name="rid" type="VARCHAR(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="session_jti" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issued_at" type="TIMESTAMP"/>
+            <column name="expires_at" type="TIMESTAMP"/>
+            <column name="revoked_at" type="TIMESTAMP"/>
+            <column name="rotated_at" type="TIMESTAMP"/>
+            <column name="fingerprint_hash" type="VARCHAR(128)"/>
+            <column name="device" type="VARCHAR(128)"/>
+            <column name="ip" type="VARCHAR(64)"/>
+            <column name="status" type="VARCHAR(16)"/>
+        </createTable>
+
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_session_jti">
+            <column name="session_jti"/>
+        </createIndex>
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_expires_at">
+            <column name="expires_at"/>
+        </createIndex>
+
+        <createTable tableName="token_blocklist">
+            <column name="jti" type="VARCHAR(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reason" type="VARCHAR(128)"/>
+            <column name="revoked_at" type="TIMESTAMP"/>
+            <column name="expires_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="token_blocklist"/>
+            <dropIndex indexName="idx_refresh_tokens_expires_at" tableName="refresh_tokens"/>
+            <dropIndex indexName="idx_refresh_tokens_session_jti" tableName="refresh_tokens"/>
+            <dropIndex indexName="idx_refresh_tokens_user_id" tableName="refresh_tokens"/>
+            <dropTable tableName="refresh_tokens"/>
+            <dropIndex indexName="idx_sessions_expires_at" tableName="sessions"/>
+            <dropIndex indexName="idx_sessions_user_id" tableName="sessions"/>
+            <dropTable tableName="sessions"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+
