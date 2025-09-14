@@ -24,12 +24,14 @@ class DefaultTokenService(
     private val refreshRepo: RefreshTokenJpaRepository,
     private val sessionCache: SessionCache,
     private val blocklist: BlocklistCache,
+    private val jwt: JwtService,
+    private val props: ru.vassuv.familytree.config.JwtProperties,
 ) : TokenService {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // TODO(ft-auth-05): вынести TTL и issuer в JwtProperties (config) и использовать реальный JWT RS256
-    private val accessTtl: Duration = Duration.ofMinutes(15)
-    private val refreshTtl: Duration = Duration.ofDays(30)
+    // TTL берём из конфига (JwtProperties)
+    private val accessTtl: Duration get() = Duration.ofSeconds(props.accessTtlSeconds)
+    private val refreshTtl: Duration get() = Duration.ofSeconds(props.refreshTtlSeconds)
 
     override fun issueForTelegram(telegramId: Long, invitationId: String?): AuthTokens {
         val now = Instant.now()
@@ -75,8 +77,13 @@ class DefaultTokenService(
             )
         )
 
-        // Placeholder access token; replace with JWT signed token
-        val access = "access-$jti"
+        // Реальный access JWT (RS256)
+        val access = jwt.sign(
+            subject = userId.toString(),
+            jti = jti,
+            expiresAt = now.plus(accessTtl),
+            extraClaims = emptyMap(),
+        )
         logger.debug("Issued tokens for telegramId={}, jti={}", telegramId, jti)
         return AuthTokens(accessToken = access, refreshToken = rid)
     }
