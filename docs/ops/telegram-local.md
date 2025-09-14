@@ -11,7 +11,7 @@
 Создайте `.env` из примера и заполните значения:
 
 ```bash
-cp .env.example .env
+cp .env .env
 ```
 
 Ключевые переменные:
@@ -28,7 +28,7 @@ Docker Compose автоматически пробросит их в `AUTH_TELEG
 
 ```bash
 # один раз: подготовить .env
-cp .env.example .env
+cp .env .env
 
 # запустить сервисы
 docker compose up --build

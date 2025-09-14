@@ -13,11 +13,12 @@ class TelegramBotMachine(
 
     fun handle(update: TelegramUpdateRequest): Any {
         val text = update.message?.text
-        if (text.isNullOrBlank()) return mapOf("ok" to true)
+        val callbackData = update.callback_query?.data
+        if (text.isNullOrBlank() && callbackData.isNullOrBlank()) return mapOf("ok" to true)
 
         val cmd = commands.firstOrNull { it.supports(update) }
         if (cmd == null) {
-            logger.debug("No command matched; ignoring. text={}", text)
+            logger.debug("No command matched; ignoring. text={}, callback={}", text, callbackData)
             return mapOf("ok" to true)
         }
         return cmd.execute(update)

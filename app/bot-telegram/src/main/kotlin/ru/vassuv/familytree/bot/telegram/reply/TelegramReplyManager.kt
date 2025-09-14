@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
+import ru.vassuv.familytree.bot.telegram.reply.mapping.toDto
 import ru.vassuv.familytree.config.TelegramAuthProperties
 
 @Component
@@ -23,24 +25,13 @@ class TelegramReplyManager(
         }
 
         val url = "https://api.telegram.org/bot${token}/sendMessage"
-        val payload = when (reply) {
-            is Reply.Text -> SendMessageRequest(chat_id = chatId, text = reply.text)
-            is Reply.Buttons -> SendMessageRequest(
-                chat_id = chatId,
-                text = reply.text,
-                reply_markup = InlineKeyboardMarkup(
-                    inline_keyboard = reply.rows.map { row ->
-                        row.map { b -> InlineKeyboardButton(text = b.text, url = b.url, callback_data = b.callbackData) }
-                    }
-                )
-            )
-        }
+        val payload = reply.toDto(chatId)
 
         return try {
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
             val entity = HttpEntity(payload, headers)
-            val resp = rest.postForEntity(url, entity, Map::class.java)
+            val resp = rest.postForEntity<Map<String, String>>(url, entity)
             val ok = (resp.body as? Map<*, *>)?.get("ok") as? Boolean ?: (resp.statusCode.is2xxSuccessful)
             ReplyResult(ok = ok, description = resp.statusCode.toString())
         } catch (ex: Exception) {
@@ -49,22 +40,3 @@ class TelegramReplyManager(
         }
     }
 }
-
-// --- Telegram API payloads ---
-data class SendMessageRequest(
-    val chat_id: Long,
-    val text: String,
-    val parse_mode: String? = null,
-    val reply_markup: InlineKeyboardMarkup? = null,
-)
-
-data class InlineKeyboardMarkup(
-    val inline_keyboard: List<List<InlineKeyboardButton>>,
-)
-
-data class InlineKeyboardButton(
-    val text: String,
-    val url: String? = null,
-    val callback_data: String? = null,
-)
-

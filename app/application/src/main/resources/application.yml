@@ -40,4 +40,5 @@ auth:
     bot-username: ${BOT_USERNAME:my_family_bot}
     session-ttl-seconds: ${TELEGRAM_SESSION_TTL:300}
     webhook-secret: ${BOT_WEBHOOK_SECRET:my-secret-token}
+    bot-token: ${BOT_TOKEN:bot_token}
 

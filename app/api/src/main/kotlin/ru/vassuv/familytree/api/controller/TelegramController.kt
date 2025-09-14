@@ -31,12 +31,19 @@ class TelegramController(
   fun createSession(
     @RequestBody(required = false) req: CreateTelegramSessionRequest?
   ): CreateTelegramSessionResponse {
+    // TODO(ft-auth-02): Ввести rate limit для создания сессий (429 Too Many Requests)
+    //   Варианты: по IP (X-Forwarded-For) или session cookie; хранить счётчик в Redis
+    //   и ограничивать частоту на окно (например, 5 req / 30s). На превышение — 429.
     val session = service.createSession(req?.invitationId, props.sessionTtlSeconds)
     return mapper.toCreateSessionResponse(session, props.botUsername)
   }
 
   @GetMapping("/session/{sid}")
   fun awaitLoginSession(@PathVariable sid: String): AwaitTelegramSessionResponse =
+    // TODO(ft-auth-04): На статусе READY выставлять refresh-cookie (HttpOnly, Secure, SameSite=Lax/Strict, TTL)
+    //   Сейчас refreshToken возвращается в теле ответа для простоты. Нужно перенести его в cookie,
+    //   а в ответе оставить только accessToken, либо весь auth — но cookie обязательно.
+    //   После успешной установки cookie пометить sid как USED (сервис уже делает markUsed).
     mapper.mapPollResult(service.awaitLoginSession(sid))
 
   @PostMapping("/webhook")

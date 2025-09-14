@@ -102,6 +102,11 @@ class TelegramService(
     val existing: PendingSessionRecord = pendingRepo.get(sid)
       ?: return WebhookConfirmResult(false, "Session not found or expired")
 
+    // TODO(ft-auth-03): Найти/создать аккаунт пользователя по telegramId
+    //   - Если пользователя нет — создать в БД (telegramId, username/first/last), привязать к приглашению при наличии
+    //   - Если есть invitationId у сессии — принять инвайт и назначить активную семью
+    //   - Подготовить серверную сессию (jti) для последующей выдачи токенов
+
     return when (val res = pendingRepo.markReady(sid, tg.id)) {
       is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.Ok -> WebhookConfirmResult(true, "Session confirmed. You can return to app.")
       is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.AlreadyReady -> WebhookConfirmResult(true, "Already confirmed. You can return to app.")
