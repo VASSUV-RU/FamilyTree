@@ -35,6 +35,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/familytree
       SPRING_DATASOURCE_USERNAME: family
@@ -43,10 +45,18 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       # Optional extra JVM opts
       JAVA_OPTS: -Xms256m -Xmx512m
+      # Redis connection (overridable via .env)
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:redis}
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:yourpassword}
+      AUTH_TELEGRAM_BOT_USERNAME: ${BOT_USERNAME:my_family_bot}
+      AUTH_TELEGRAM_SESSION_TTL_SECONDS: ${TELEGRAM_SESSION_TTL:300}
+      AUTH_TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:local}
     ports:
       - "8080:8080"
+    env_file:
+      - .env
 
 volumes:
   pgdata: {}
   redis_data:
-

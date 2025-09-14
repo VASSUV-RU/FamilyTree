@@ -12,13 +12,34 @@
 - Тесты проверяем с помощью Mockito-kotlin
 
 ## Сборка, тесты и локальный запуск
-- пока нет
+- Сборка: `./gradlew build`
+- Тесты: `./gradlew test`
+- Запуск приложения: `./gradlew :app:application:bootRun`
+- Docker Compose (локально): `cp .env.example .env && docker compose up --build`
+- Профили: локально активируем `local` (через `SPRING_PROFILES_ACTIVE=local` или .env)
+
+Переменные окружения (локально через `.env`):
+- `BOT_USERNAME`, `TELEGRAM_SESSION_TTL`, `TELEGRAM_WEBHOOK_SECRET`
+- БД: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- Redis: `REDIS_HOST`, `REDIS_PASSWORD`
+
+Заметка: сейчас для удобства разработки включены «локальные» настройки. Перед выкладкой в прод — пересмотреть активацию профилей и секретов (секреты только через переменные окружения/секрет‑менеджер).
 
 ## Стиль кода и соглашения об именовании
-- пока нет
+- Kotlin/JDK: Kotlin 2.2, JDK 24 (см. `jvmToolchain(24)`).
+- Логи: SLF4J, без `println` в продуктивном коде.
+- Репозитории/сущности: именовать методы по домену (пример: `countPersons()` вместо `countUsers()` для Person).
 
 ## Руководство по тестированию
-- пока нет
+- Моки: Mockito-Kotlin.
+- Контроллеры: `@WebMvcTest`, тесты группируем по внешним операциям (пример: для Telegram — отдельные файлы под `/session` и `/webhook`).
+- Сервисы: отдельный файл на публичный метод сервиса.
+- Data-интеграция: при работе с реальным Redis/PostgreSQL — Testcontainers.
+- Именование: `ClassName_Method_BehaviorExpected`.
+
+Ошибки/исключения:
+- Для возврата ошибок используйте исключения из `app/libs/config` (`NotFoundException`, `ConflictException`, `GoneException`, `UnauthorizeException`) и хелперы `notFoundError()`, `conflictError()`, `goneError()`, `unauthorizeError()`.
+- Глобальная обработка ошибок находится в `app/libs/exceptionhandler`.
 
 ## Коммиты и Pull Request’ы
 - Коммиты: Conventional Commits (пример: `feat(auth): add email login`). Сообщение — повелительное наклонение и чёткая область.

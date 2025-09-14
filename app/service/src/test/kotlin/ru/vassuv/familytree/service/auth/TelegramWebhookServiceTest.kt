@@ -26,7 +26,7 @@ class TelegramWebhookServiceTest {
     }
 
     private val sid = "Sabc"
-    private val tg = TelegramUserInfo(id = 1, username = "u", firstName = "f", lastName = "l")
+    private val tg = TelegramService.TelegramUserInfo(id = 1, username = "u", firstName = "f", lastName = "l")
 
     @Test
     fun `returns not found when no session`() {

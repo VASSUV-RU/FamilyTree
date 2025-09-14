@@ -14,3 +14,9 @@ out/
 # Local configs / secrets
 **/application-local.yml
 
+# Local env files
+.env
+**/.env
+
+
+/ops/

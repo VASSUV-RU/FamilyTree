@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(project(":app:libs:config"))
     implementation(project(":app:service"))
+    implementation(project(":app:bot-telegram"))
     implementation(project(":app:data"))
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -23,4 +24,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // Temporary: allow empty test suite for API module until tests are added
+    failOnNoDiscoveredTests = false
 }

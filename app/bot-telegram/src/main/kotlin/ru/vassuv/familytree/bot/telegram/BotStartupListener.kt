@@ -7,14 +7,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class BotStartupListener(
-    private val telegramBotService: TelegramBotService,
+    private val telegramBotService: TelegramBotMachine,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @EventListener(ApplicationReadyEvent::class)
     fun onReady() {
         logger.info("Application ready; initializing Telegram bot layer…")
-        telegramBotService.notifyStartup()
     }
 }
 

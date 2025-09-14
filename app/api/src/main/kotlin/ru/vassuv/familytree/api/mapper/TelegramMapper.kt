@@ -6,7 +6,7 @@ import ru.vassuv.familytree.api.dto.response.session.AuthTokensResponse
 import ru.vassuv.familytree.service.auth.PollDelivery
 import ru.vassuv.familytree.service.model.CreatedTelegramSession
 
-class TelegramAuthMapper {
+class TelegramMapper {
 
     fun toCreateSessionResponse(session: CreatedTelegramSession, botUsername: String): CreateTelegramSessionResponse {
         require(botUsername.isNotBlank()) { "botUsername is blank" }
