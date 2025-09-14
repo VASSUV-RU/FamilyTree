@@ -16,11 +16,12 @@ cp .env.example .env
 
 Ключевые переменные:
 - `BOT_USERNAME` — имя вашего бота без `@`.
+- `BOT_TOKEN` — токен бота от BotFather (нужен для исходящих сообщений).
 - `TELEGRAM_SESSION_TTL` — TTL «ожидающей сессии» в секундах (например, `300`).
 - `TELEGRAM_WEBHOOK_SECRET` — произвольный секрет для заголовка `X-Telegram-Bot-Api-Secret-Token`.
 - `REDIS_HOST`, `REDIS_PASSWORD` — настройки Redis (совпадают с docker-compose по умолчанию).
 
-Docker Compose автоматически пробросит их в `AUTH_TELEGRAM_*` свойства Spring. При локальном запуске без Docker используйте переменные окружения Spring: `AUTH_TELEGRAM_BOT_USERNAME`, `AUTH_TELEGRAM_SESSION_TTL_SECONDS`, `AUTH_TELEGRAM_WEBHOOK_SECRET` (или `application-local.yml`).
+Docker Compose автоматически пробросит их в `AUTH_TELEGRAM_*` свойства Spring. При локальном запуске без Docker используйте переменные окружения Spring: `AUTH_TELEGRAM_BOT_USERNAME`, `AUTH_TELEGRAM_BOT_TOKEN`, `AUTH_TELEGRAM_SESSION_TTL_SECONDS`, `AUTH_TELEGRAM_WEBHOOK_SECRET` (или `application-local.yml`).
 
 ## Запуск инфраструктуры
 Вариант A — через Docker Compose (БД + Redis + приложение):
@@ -124,4 +125,3 @@ curl -sS http://localhost:8080/auth/telegram/session/Sabc123 | jq .
 ## Безопасность
 - Не коммитьте токен бота и секреты.
 - Для продакшена используйте отдельный домен/сертификат и секреты только из переменных окружения или менеджера секретов.
-

@@ -11,4 +11,6 @@ data class TelegramAuthProperties(
     @field:NotBlank val botUsername: String,
     @field:Positive val sessionTtlSeconds: Long = 300,
     val webhookSecret: String = "",
+    // Optional: token to send messages back to Telegram (Bot API)
+    val botToken: String? = null,
 )

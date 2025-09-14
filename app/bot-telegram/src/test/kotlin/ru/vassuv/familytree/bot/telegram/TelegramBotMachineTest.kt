@@ -9,6 +9,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import ru.vassuv.familytree.bot.telegram.command.PingCommand
 import ru.vassuv.familytree.bot.telegram.command.StartCommand
+import ru.vassuv.familytree.bot.telegram.reply.ReplyManager
 import ru.vassuv.familytree.bot.telegram.webhook.dto.TelegramChat
 import ru.vassuv.familytree.bot.telegram.webhook.dto.TelegramMessage
 import ru.vassuv.familytree.bot.telegram.webhook.dto.TelegramUpdate
@@ -20,7 +21,8 @@ class TelegramBotMachineTest {
     @Test
     fun `handles start and confirms via service`() {
         val svc: TelegramService = mock()
-        val machine = TelegramBotMachine(listOf(StartCommand(svc)))
+        val replies: ReplyManager = mock()
+        val machine = TelegramBotMachine(listOf(StartCommand(svc, replies)))
 
         whenever(svc.parseStartSid("/start Sabc")).thenReturn("Sabc")
         whenever(
@@ -48,7 +50,8 @@ class TelegramBotMachineTest {
     @Test
     fun `ignores non-start messages`() {
         val svc: TelegramService = mock()
-        val machine = TelegramBotMachine(listOf(StartCommand(svc)))
+        val replies: ReplyManager = mock()
+        val machine = TelegramBotMachine(listOf(StartCommand(svc, replies)))
 
         val update = TelegramUpdate(
             update_id = 2,
@@ -67,7 +70,8 @@ class TelegramBotMachineTest {
     @Test
     fun `handles ping command`() {
         val svc: TelegramService = mock() // not used by Ping
-        val machine = TelegramBotMachine(listOf(PingCommand(), StartCommand(svc)))
+        val replies: ReplyManager = mock()
+        val machine = TelegramBotMachine(listOf(PingCommand(replies), StartCommand(svc, replies)))
 
         val update = TelegramUpdate(
             update_id = 3,
