@@ -45,6 +45,6 @@ auth:
     issuer: ${JWT_ISSUER:family-tree}
     access-ttl-seconds: ${JWT_ACCESS_TTL:900}
     refresh-ttl-seconds: ${JWT_REFRESH_TTL:2592000}
-    # TODO: подключить ключи через переменные окружения / секрет-менеджер
-    # public-key-pem: ${JWT_PUBLIC_PEM:}
-    # private-key-pem: ${JWT_PRIVATE_PEM:}
+    # Подключайте ключи через переменные окружения / секрет-менеджер
+    public-key-pem: ${JWT_PUBLIC_PEM:}
+    private-key-pem: ${JWT_PRIVATE_PEM:}

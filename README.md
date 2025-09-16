@@ -44,6 +44,8 @@
 - `service` → `data`, `libs`
 - `data` → PostgreSQL/JPA/Redis
 
+Чтобы локально проверять TelegramBot - запустить команду `ngrok http 8080`
+
 Примечание: слой Telegram пока содержит заглушку `TelegramBotService`.
 
 ## Docker Compose (БД + Redis + сервис)
