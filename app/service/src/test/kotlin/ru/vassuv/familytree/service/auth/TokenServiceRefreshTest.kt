@@ -17,6 +17,7 @@ import ru.vassuv.familytree.data.auth.session.RefreshTokenJpaRepository
 import ru.vassuv.familytree.data.auth.session.SessionEntity
 import ru.vassuv.familytree.data.auth.session.SessionJpaRepository
 import ru.vassuv.familytree.data.auth.session.SessionStatus
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import java.time.Instant
 import java.util.Optional
 
@@ -30,7 +31,8 @@ class TokenServiceRefreshTest {
         val cache: ru.vassuv.familytree.data.auth.session.SessionCache = mock()
         val jwt = JwtService(JwtProperties())
         val invitation: ru.vassuv.familytree.service.invite.InvitationService = mock()
-        val svc = DefaultTokenService(sessionRepo, refreshRepo, cache, blocklist, jwt, JwtProperties(), invitation)
+        val audit: AuthAuditService = mock()
+        val svc = DefaultTokenService(sessionRepo, refreshRepo, cache, blocklist, jwt, JwtProperties(), invitation, audit)
         return Pair(svc, jwt)
     }
 

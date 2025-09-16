@@ -10,6 +10,7 @@ import org.mockito.kotlin.whenever
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import ru.vassuv.familytree.service.auth.pending.SidGenerator
 
 class TelegramServiceTest {
@@ -21,7 +22,8 @@ class TelegramServiceTest {
             override fun generate(byteLength: Int, prefix: String): String = "Sfixed1"
         }
         val tokenService: TokenService = mock()
-        val service = TelegramService(repo, sidGen, tokenService)
+        val audit: AuthAuditService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit)
 
         whenever(
             repo.create(
@@ -44,7 +46,8 @@ class TelegramServiceTest {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sfirst" else "Ssecond"
         }
         val tokenService: TokenService = mock()
-        val service = TelegramService(repo, sidGen, tokenService)
+        val audit: AuthAuditService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit)
 
         whenever(
             repo.create(
@@ -74,7 +77,8 @@ class TelegramServiceTest {
         val sidGen = object : SidGenerator() {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sa" else "Sb"
         }
-        val service = TelegramService(repo, sidGen, tokenService)
+        val audit: AuthAuditService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit)
 
         whenever(
             repo.create(

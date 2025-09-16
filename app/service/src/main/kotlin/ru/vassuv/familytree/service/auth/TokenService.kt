@@ -9,10 +9,13 @@ import ru.vassuv.familytree.data.auth.session.SessionCache
 import ru.vassuv.familytree.data.auth.session.SessionEntity
 import ru.vassuv.familytree.data.auth.session.SessionJpaRepository
 import ru.vassuv.familytree.data.auth.session.SessionStatus
+import ru.vassuv.familytree.service.auth.audit.AuthAuditEvent
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import ru.vassuv.familytree.service.model.AuthTokens
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import kotlin.collections.buildMap
 
 interface TokenService {
     fun issueForTelegram(telegramId: Long, invitationId: String?): AuthTokens
@@ -30,6 +33,7 @@ class DefaultTokenService(
     private val jwt: JwtService,
     private val props: ru.vassuv.familytree.config.JwtProperties,
     private val invitation: ru.vassuv.familytree.service.invite.InvitationService,
+    private val audit: AuthAuditService,
 ) : TokenService {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -95,6 +99,16 @@ class DefaultTokenService(
             expiresAt = now.plus(accessTtl),
             extraClaims = emptyMap(),
         )
+        audit.logSuccess(
+            event = AuthAuditEvent.TOKEN_ISSUED,
+            jti = jti,
+            userId = userId,
+            details = buildMap {
+                put("telegramId", telegramId)
+                invitationId?.let { put("invitationId", it) }
+                resolvedFamilyId?.let { put("activeFamilyId", it) }
+            }
+        )
         logger.debug("Issued tokens for telegramId={}, jti={}", telegramId, jti)
         return AuthTokens(accessToken = access, refreshToken = rid)
     }
@@ -102,8 +116,27 @@ class DefaultTokenService(
     override fun refresh(refreshRid: String): AuthTokens {
         val now = Instant.now()
         val refreshOpt = refreshRepo.findById(refreshRid)
-        val refresh = refreshOpt.orElseThrow { ru.vassuv.familytree.config.exception.UnauthorizeException() }
+        val refresh = refreshOpt.orElseThrow {
+            audit.logFailure(
+                event = AuthAuditEvent.TOKEN_REFRESH_FAILED,
+                reason = "refresh-not-found",
+                details = mapOf("rid" to refreshRid)
+            )
+            ru.vassuv.familytree.config.exception.UnauthorizeException()
+        }
         if (refresh.expiresAt.isBefore(now) || refresh.status != ru.vassuv.familytree.data.auth.session.RefreshStatus.ACTIVE || refresh.revokedAt != null) {
+            audit.logFailure(
+                event = AuthAuditEvent.TOKEN_REFRESH_FAILED,
+                jti = refresh.sessionJti,
+                userId = refresh.userId,
+                reason = "refresh-invalid",
+                details = mapOf(
+                    "rid" to refreshRid,
+                    "status" to refresh.status.name,
+                    "expiredAt" to refresh.expiresAt.epochSecond,
+                    "revoked" to (refresh.revokedAt != null)
+                )
+            )
             throw ru.vassuv.familytree.config.exception.UnauthorizeException()
         }
 
@@ -111,6 +144,12 @@ class DefaultTokenService(
         val oldSession = sessionRepo.findById(oldJti).orElse(null)
         if (oldSession == null) {
             // Без старой сессии продолжать нельзя — отказ
+            audit.logFailure(
+                event = AuthAuditEvent.TOKEN_REFRESH_FAILED,
+                jti = oldJti,
+                reason = "session-not-found",
+                details = mapOf("rid" to refreshRid)
+            )
             throw ru.vassuv.familytree.config.exception.UnauthorizeException()
         }
 
@@ -155,6 +194,16 @@ class DefaultTokenService(
             jti = newJti,
             expiresAt = newSession.expiresAt,
         )
+        audit.logSuccess(
+            event = AuthAuditEvent.TOKEN_REFRESHED,
+            jti = newJti,
+            userId = newSession.userId,
+            details = mapOf(
+                "rid" to refreshRid,
+                "oldJti" to oldJti,
+                "capVersion" to newSession.capVersion
+            )
+        )
         logger.debug("Refreshed tokens for rid={}, oldJti={}, newJti={}", refreshRid, oldJti, newJti)
         return AuthTokens(accessToken = access, refreshToken = refreshRid)
     }
@@ -162,7 +211,8 @@ class DefaultTokenService(
     override fun logout(jti: String) {
         val now = Instant.now()
         // Try to determine TTL from DB session, fallback to access TTL
-        val ttl = sessionRepo.findById(jti).map { entity ->
+        val sessionOpt = sessionRepo.findById(jti)
+        val ttl = sessionOpt.map { entity ->
             (entity.expiresAt.epochSecond - now.epochSecond).coerceAtLeast(1)
         }.orElse(accessTtl.seconds).coerceAtLeast(1)
 
@@ -171,11 +221,18 @@ class DefaultTokenService(
         runCatching { sessionCache.evict(jti) }
         // Optionally mark DB session as revoked (best-effort)
         runCatching {
-            val entity = sessionRepo.findById(jti).orElse(null)
+            val entity = sessionOpt.orElse(null)
             if (entity != null && entity.status != SessionStatus.REVOKED) {
                 sessionRepo.save(entity.copy(status = SessionStatus.REVOKED))
             }
         }
+        val sessionEntity = sessionOpt.orElse(null)
+        audit.logSuccess(
+            event = AuthAuditEvent.SESSION_LOGOUT,
+            jti = jti,
+            userId = sessionEntity?.userId,
+            details = mapOf("ttlSec" to ttl)
+        )
         logger.debug("Logged out session jti={}, ttl={}s", jti, ttl)
     }
 
@@ -234,8 +291,19 @@ class DefaultTokenService(
                     )
                 )
                 newRid
-            }
+                }
 
         return AuthTokens(accessToken = access, refreshToken = rid)
+            .also {
+                audit.logSuccess(
+                    event = AuthAuditEvent.ACTIVE_FAMILY_SWITCHED,
+                    jti = updated.jti,
+                    userId = updated.userId,
+                    details = mapOf(
+                        "familyId" to familyId,
+                        "capVersion" to updated.capVersion
+                    )
+                )
+            }
     }
 }

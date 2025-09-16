@@ -13,6 +13,7 @@ import ru.vassuv.familytree.data.auth.session.SessionCache
 import ru.vassuv.familytree.data.auth.session.SessionEntity
 import ru.vassuv.familytree.data.auth.session.SessionJpaRepository
 import ru.vassuv.familytree.data.auth.session.BlocklistCache
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import ru.vassuv.familytree.service.invite.InvitationService
 import java.time.Instant
 
@@ -31,7 +32,8 @@ class TokenServiceIssueInviteTest {
         whenever(sessionRepo.save(any())).thenAnswer { it.arguments[0] }
         whenever(refreshRepo.save(any())).thenAnswer { it.arguments[0] }
 
-        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation)
+        val audit: AuthAuditService = mock()
+        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation, audit)
         val tokens = svc.issueForTelegram(telegramId = 777L, invitationId = "inv-1")
 
         // verify cache was set with activeFamilyId 555
@@ -44,4 +46,3 @@ class TokenServiceIssueInviteTest {
         assertEquals("777", decoded.subject)
     }
 }
-

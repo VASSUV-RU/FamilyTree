@@ -20,6 +20,7 @@ import ru.vassuv.familytree.data.auth.session.SessionCache
 import ru.vassuv.familytree.data.auth.session.SessionEntity
 import ru.vassuv.familytree.data.auth.session.SessionJpaRepository
 import ru.vassuv.familytree.data.auth.session.SessionStatus
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import java.time.Instant
 import java.util.Optional
 
@@ -63,7 +64,8 @@ class TokenServiceSwitchFamilyTest {
         )
 
         val invitation: ru.vassuv.familytree.service.invite.InvitationService = mock()
-        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation)
+        val audit: AuthAuditService = mock()
+        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation, audit)
         val tokens = svc.switchActiveFamily(userId = userId, currentJti = jti, familyId = 77)
 
         // verify session saved with updated family and capVersion incremented
@@ -103,7 +105,8 @@ class TokenServiceSwitchFamilyTest {
         whenever(sessionRepo.findById(eq(jti))).thenReturn(Optional.of(existing))
 
         val invitation: ru.vassuv.familytree.service.invite.InvitationService = mock()
-        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation)
+        val audit: AuthAuditService = mock()
+        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation, audit)
         assertThrows(UnauthorizeException::class.java) {
             svc.switchActiveFamily(userId = 1, currentJti = jti, familyId = 55)
         }
@@ -118,7 +121,8 @@ class TokenServiceSwitchFamilyTest {
         val jwt = JwtService(JwtProperties())
 
         val invitation: ru.vassuv.familytree.service.invite.InvitationService = mock()
-        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation)
+        val audit: AuthAuditService = mock()
+        val svc = DefaultTokenService(sessionRepo, refreshRepo, sessionCache, blocklist, jwt, JwtProperties(), invitation, audit)
         assertThrows(IllegalArgumentException::class.java) {
             svc.switchActiveFamily(userId = 1, currentJti = "J", familyId = 0)
         }

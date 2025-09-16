@@ -17,7 +17,7 @@ import ru.vassuv.familytree.bot.telegram.TelegramBotMachine
 import ru.vassuv.familytree.bot.telegram.webhook.dto.TelegramUpdateRequest
 import ru.vassuv.familytree.config.TelegramAuthProperties
 import ru.vassuv.familytree.service.auth.TelegramService
-import ru.vassuv.familytree.service.rate.RateLimiter
+import ru.vassuv.familytree.data.rate.RateLimiter
 
 @RestController
 @RequestMapping("/auth/telegram")

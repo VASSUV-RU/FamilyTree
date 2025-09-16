@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="2025-09-20-004-auth-audit" author="codex">
+        <createTable tableName="auth_audit">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_time" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sid" type="VARCHAR(128)"/>
+            <column name="jti" type="VARCHAR(128)"/>
+            <column name="user_id" type="BIGINT"/>
+            <column name="details" type="TEXT"/>
+        </createTable>
+
+        <createIndex tableName="auth_audit" indexName="idx_auth_audit_type_time">
+            <column name="event_type"/>
+            <column name="event_time"/>
+        </createIndex>
+
+        <createIndex tableName="auth_audit" indexName="idx_auth_audit_user_time">
+            <column name="user_id"/>
+            <column name="event_time"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

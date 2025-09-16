@@ -8,13 +8,15 @@ import ru.vassuv.familytree.config.exception.goneError
 import ru.vassuv.familytree.config.exception.notFoundError
 import kotlin.math.min
 import ru.vassuv.familytree.data.auth.pending.MarkUsedResult
-import ru.vassuv.familytree.service.model.AuthTokens
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus.PENDING
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus.READY
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus.USED
+import ru.vassuv.familytree.service.auth.audit.AuthAuditEvent
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import ru.vassuv.familytree.service.auth.pending.SidGenerator
+import ru.vassuv.familytree.service.model.AuthTokens
 import ru.vassuv.familytree.service.model.CreatedTelegramSession
 
 sealed interface PollDelivery {
@@ -27,6 +29,7 @@ class TelegramService(
   private val pendingRepo: PendingSessionRepository,
   private val sidGenerator: SidGenerator,
   private val tokenService: TokenService,
+  private val audit: AuthAuditService,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
   fun createSession(invitationId: String?, ttlSeconds: Long): CreatedTelegramSession {
@@ -37,7 +40,20 @@ class TelegramService(
       return if (ok) sid else null
     }
 
-    val sid = generateSid() ?: generateSid() ?: error("Failed to create pending session")
+    val sid = generateSid() ?: generateSid()
+    if (sid == null) {
+      audit.logFailure(
+        event = AuthAuditEvent.TELEGRAM_SESSION_CREATED,
+        reason = "sid-generation-failed",
+        details = invitationId?.let { mapOf("invitationId" to it) }
+      )
+      error("Failed to create pending session")
+    }
+    audit.logSuccess(
+      event = AuthAuditEvent.TELEGRAM_SESSION_CREATED,
+      sid = sid,
+      details = invitationId?.let { mapOf("invitationId" to it) }
+    )
     return CreatedTelegramSession(sid, ttlSeconds)
   }
 
@@ -100,7 +116,15 @@ class TelegramService(
 
   fun confirmStart(sid: String, tg: TelegramUserInfo): WebhookConfirmResult {
     val existing: PendingSessionRecord = pendingRepo.get(sid)
-      ?: return WebhookConfirmResult(false, "Session not found or expired")
+      ?: run {
+        audit.logFailure(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRMED,
+          sid = sid,
+          userId = tg.id,
+          reason = "session-not-found"
+        )
+        return WebhookConfirmResult(false, "Session not found or expired")
+      }
 
     // TODO(ft-auth-03): Найти/создать аккаунт пользователя по telegramId
     //   - Если пользователя нет — создать в БД (telegramId, username/first/last), привязать к приглашению при наличии
@@ -108,12 +132,50 @@ class TelegramService(
     //   - Подготовить серверную сессию (jti) для последующей выдачи токенов
 
     return when (val res = pendingRepo.markReady(sid, tg.id)) {
-      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.Ok -> WebhookConfirmResult(true, "Session confirmed. You can return to app.")
-      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.AlreadyReady -> WebhookConfirmResult(true, "Already confirmed. You can return to app.")
-      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.AlreadyUsed -> WebhookConfirmResult(false, "Session already used")
-      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.NotFound -> WebhookConfirmResult(false, "Session not found or expired")
+      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.Ok -> {
+        audit.logSuccess(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRMED,
+          sid = sid,
+          userId = tg.id,
+          details = mapOf("status" to "ready")
+        )
+        WebhookConfirmResult(true, "Session confirmed. You can return to app.")
+      }
+      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.AlreadyReady -> {
+        audit.logSuccess(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRMED,
+          sid = sid,
+          userId = tg.id,
+          details = mapOf("status" to "already-ready")
+        )
+        WebhookConfirmResult(true, "Already confirmed. You can return to app.")
+      }
+      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.AlreadyUsed -> {
+        audit.logFailure(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRM_FAILED,
+          sid = sid,
+          userId = tg.id,
+          reason = "session-already-used"
+        )
+        WebhookConfirmResult(false, "Session already used")
+      }
+      is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.NotFound -> {
+        audit.logFailure(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRM_FAILED,
+          sid = sid,
+          userId = tg.id,
+          reason = "session-not-found"
+        )
+        WebhookConfirmResult(false, "Session not found or expired")
+      }
       is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.Conflict -> {
         logger.warn("markReady conflict for sid={}", sid)
+        audit.logFailure(
+          event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRM_FAILED,
+          sid = sid,
+          userId = tg.id,
+          reason = "mark-ready-conflict"
+        )
         WebhookConfirmResult(false, "Temporary conflict, try again")
       }
     }

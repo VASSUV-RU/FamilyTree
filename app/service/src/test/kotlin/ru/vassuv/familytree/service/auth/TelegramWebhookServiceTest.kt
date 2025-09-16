@@ -11,28 +11,41 @@ import ru.vassuv.familytree.data.auth.pending.MarkReadyResult
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRecord
 import ru.vassuv.familytree.data.auth.pending.PendingSessionRepository
 import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus
+import ru.vassuv.familytree.service.auth.audit.AuthAuditService
+import ru.vassuv.familytree.service.auth.pending.SidGenerator
+import ru.vassuv.familytree.service.model.AuthTokens
 
 class TelegramWebhookServiceTest {
+    private val repo: PendingSessionRepository = mock()
 
-    private fun serviceWith(repo: PendingSessionRepository): TelegramService {
-        val sidGen = object : ru.vassuv.familytree.service.auth.pending.SidGenerator() {
-            override fun generate(byteLength: Int, prefix: String): String = "S"
-        }
-        val tokenSvc = object : TokenService {
-            override fun issueForTelegram(telegramId: Long, invitationId: String?) =
-                ru.vassuv.familytree.service.model.AuthTokens("a","r")
-        }
-        return TelegramService(repo, sidGen, tokenSvc)
+    private val sidGen = object : SidGenerator() {
+        override fun generate(byteLength: Int, prefix: String): String = "S"
     }
+
+    private val tokenSvc = object : TokenService {
+        override fun issueForTelegram(telegramId: Long, invitationId: String?) = AuthTokens("a","r")
+
+        override fun refresh(refreshRid: String): AuthTokens {
+            throw UnsupportedOperationException("Not used in this test")
+        }
+
+        override fun logout(jti: String) { /* no-op for test */ }
+
+        override fun switchActiveFamily(userId: Long, currentJti: String, familyId: Long): AuthTokens {
+            throw UnsupportedOperationException("Not used in this test")
+        }
+    }
+
+    private val audit: AuthAuditService = mock()
+
+    private val svc = TelegramService(repo, sidGen, tokenSvc, audit)
 
     private val sid = "Sabc"
     private val tg = TelegramService.TelegramUserInfo(id = 1, username = "u", firstName = "f", lastName = "l")
 
     @Test
     fun `returns not found when no session`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(null)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(false, res.ok)
         assertEquals("Session not found or expired", res.message)
@@ -40,30 +53,24 @@ class TelegramWebhookServiceTest {
 
     @Test
     fun `ok when markReady returns Ok`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any())).thenReturn(MarkReadyResult.Ok)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(true, res.ok)
     }
 
     @Test
     fun `ok when AlreadyReady`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.READY))
         whenever(repo.markReady(eq(sid), any())).thenReturn(MarkReadyResult.AlreadyReady)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(true, res.ok)
     }
 
     @Test
     fun `false when AlreadyUsed`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.USED))
         whenever(repo.markReady(eq(sid), any())).thenReturn(MarkReadyResult.AlreadyUsed)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(false, res.ok)
         assertEquals("Session already used", res.message)
@@ -71,20 +78,16 @@ class TelegramWebhookServiceTest {
 
     @Test
     fun `false when Conflict`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any())).thenReturn(MarkReadyResult.Conflict)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(false, res.ok)
     }
 
     @Test
     fun `false when NotFound during markReady`() {
-        val repo: PendingSessionRepository = mock()
         whenever(repo.get(sid)).thenReturn(PendingSessionRecord(sid, PendingSessionStatus.PENDING))
         whenever(repo.markReady(eq(sid), any())).thenReturn(MarkReadyResult.NotFound)
-        val svc = serviceWith(repo)
         val res = svc.confirmStart(sid, tg)
         assertEquals(false, res.ok)
         assertEquals("Session not found or expired", res.message)
