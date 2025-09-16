@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   description: |
     Draft OpenAPI based on current guides.
-    Security: bearer access token (JWT). Refresh via httpOnly cookie.
+    Security: bearer access token (JWT). Refresh-token выдаётся в ответе и передаётся в теле запроса.
 servers:
   - url: http://localhost:8080
 tags:
@@ -81,9 +81,13 @@ paths:
   /auth/refresh:
     post:
       tags: [Auth]
-      summary: Issue new access token by refresh cookie
-      security:
-        - refreshCookie: []
+      summary: Issue new access token by refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
       responses:
         '200':
           description: New access token
@@ -507,10 +511,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-    refreshCookie:
-      type: apiKey
-      in: cookie
-      name: refreshToken
   parameters:
     FamilyId:
       name: id
@@ -595,8 +595,13 @@ components:
         scopes:
           type: array
           items: { type: string }
-        refreshTokenSet: { type: boolean }
-      required: [accessToken, expiresIn]
+        refreshToken: { type: string }
+      required: [accessToken, expiresIn, refreshToken]
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken: { type: string }
+      required: [refreshToken]
     ActiveFamilyRequest:
       type: object
       properties:

@@ -45,10 +45,9 @@ class TelegramController(
 
   @GetMapping("/session/{sid}")
   fun awaitLoginSession(@PathVariable sid: String): AwaitTelegramSessionResponse =
-    // TODO(ft-auth-04): На статусе READY выставлять refresh-cookie (HttpOnly, Secure, SameSite=Lax/Strict, TTL)
-    //   Сейчас refreshToken возвращается в теле ответа для простоты. Нужно перенести его в cookie,
-    //   а в ответе оставить только accessToken, либо весь auth — но cookie обязательно.
-    //   После успешной установки cookie пометить sid как USED (сервис уже делает markUsed).
+    // TODO(ft-auth-04): На статусе READY выдавать refreshToken только один раз и гарантировать, что повторный опрос не вернёт его повторно.
+    //   Сейчас refreshToken возвращается вместе с AuthResponse. Нужно добавить защиту от повторной выдачи
+    //   и убедиться, что после успешной передачи sid помечается как USED (сервис уже делает markUsed).
     mapper.mapPollResult(service.awaitLoginSession(sid))
 
   @PostMapping("/webhook")

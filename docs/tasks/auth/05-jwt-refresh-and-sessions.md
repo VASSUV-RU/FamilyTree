@@ -1,13 +1,14 @@
 # 05 — JWT/refresh и серверные сессии
 
 Цель
-- Выпуск минимального access‑JWT и refresh‑cookie. Поддержка серверных сессий в Redis и блок‑листа `blk:{jti}`.
+- Выпуск минимального access‑JWT и refresh-токена в ответе. Поддержка серверных сессий в Redis и блок‑листа `blk:{jti}`.
 
 Требования
 - access‑JWT: поля `sub`, `jti`, `iat`, `exp`; подпись RS256/ES256.
 - Redis: `sess:{jti}` — состояние (userId, activeFamilyId, scopes, capVersion, exp), TTL ≈ `accessTTL + δ`.
 - Блок‑лист `blk:{jti}` — при ротации/выходе до истечения.
 - Извлечение прав/`scopes` по активной семье.
+- Endpoint `POST /auth/refresh` принимает тело `{ refreshToken }` и возвращает новый `AuthResponse`.
 
 Приёмочные критерии
 - Валидный JWT проверяется и соотносится с `sess:{jti}`.
@@ -17,4 +18,3 @@
 - Формирование access/refresh, проверка подписи и сроков.
 - Сохранение `sess:{jti}` и чтение при запросе.
 - Блокировка по `blk:{jti}`.
-
