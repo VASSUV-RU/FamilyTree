@@ -23,7 +23,8 @@ class TelegramServiceTest {
         }
         val tokenService: TokenService = mock()
         val audit: AuthAuditService = mock()
-        val service = TelegramService(repo, sidGen, tokenService, audit)
+        val userService: ru.vassuv.familytree.service.user.UserService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit, userService)
 
         whenever(
             repo.create(
@@ -47,7 +48,8 @@ class TelegramServiceTest {
         }
         val tokenService: TokenService = mock()
         val audit: AuthAuditService = mock()
-        val service = TelegramService(repo, sidGen, tokenService, audit)
+        val userService: ru.vassuv.familytree.service.user.UserService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit, userService)
 
         whenever(
             repo.create(
@@ -78,7 +80,8 @@ class TelegramServiceTest {
             override fun generate(byteLength: Int, prefix: String): String = if (counter++ == 0) "Sa" else "Sb"
         }
         val audit: AuthAuditService = mock()
-        val service = TelegramService(repo, sidGen, tokenService, audit)
+        val userService: ru.vassuv.familytree.service.user.UserService = mock()
+        val service = TelegramService(repo, sidGen, tokenService, audit, userService)
 
         whenever(
             repo.create(

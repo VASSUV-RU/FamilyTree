@@ -13,6 +13,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @Testcontainers
@@ -64,7 +65,7 @@ class PendingSessionRepositoryRedisTest {
         TimeUnit.SECONDS.sleep(2)
         val loaded = repo.get(sid)
         assertNull(loaded)
-        val res = repo.markReady(sid, loaded?.telegramId ?: 0L)
+        val res = repo.markReady(sid, telegramId = loaded?.telegramId ?: 0L, userId = "user-expired")
         assertEquals(MarkReadyResult.NotFound, res)
     }
 
@@ -72,11 +73,14 @@ class PendingSessionRepositoryRedisTest {
     fun `markReady idempotent and markUsed flow`() {
         val sid = newSid()
         repo.create(sid, PendingSessionRecord(sid, PendingSessionStatus.PENDING), 10)
-        val r1 = repo.markReady(sid, telegramId = 1001)
+        val r1 = repo.markReady(sid, telegramId = 1001, userId = "user-1001")
         assertEquals(MarkReadyResult.Ok, r1)
+        val ready = repo.get(sid)
+        assertNotNull(ready)
+        assertEquals("user-1001", ready!!.userId)
 
         // Second ready should be AlreadyReady
-        val r2 = repo.markReady(sid, telegramId = 1001)
+        val r2 = repo.markReady(sid, telegramId = 1001, userId = "user-1001")
         assertEquals(MarkReadyResult.AlreadyReady, r2)
 
         // Now mark used
@@ -84,7 +88,7 @@ class PendingSessionRepositoryRedisTest {
         assertEquals(MarkUsedResult.Ok, u1)
 
         // Mark ready after used → AlreadyUsed
-        val r3 = repo.markReady(sid, telegramId = 1001)
+        val r3 = repo.markReady(sid, telegramId = 1001, userId = "user-1001")
         assertEquals(MarkReadyResult.AlreadyUsed, r3)
 
         // Mark used again is Ok (idempotent)
@@ -104,11 +108,11 @@ class PendingSessionRepositoryRedisTest {
 
         pool.submit {
             latch.await()
-            res1 = repo.markReady(sid, telegramId = 1001)
+            res1 = repo.markReady(sid, telegramId = 1001, userId = "user-1001")
         }
         pool.submit {
             latch.countDown()
-            res2 = repo.markReady(sid, telegramId = 1002)
+            res2 = repo.markReady(sid, telegramId = 1002, userId = "user-1002")
         }
         pool.shutdown()
         pool.awaitTermination(5, TimeUnit.SECONDS)

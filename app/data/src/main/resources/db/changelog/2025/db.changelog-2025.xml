@@ -11,6 +11,7 @@
     <include file="db/changelog/2025/2025-09-08-002-add-idx-persons-name.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/2025/2025-09-14-003-auth-sessions.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/2025/2025-09-20-004-auth-audit.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/2025/2025-09-22-005-create-users.xml" relativeToChangelogFile="false"/>
 
     <!-- Можно и includeAll, но явные include лучше контролируют порядок -->
     <!-- <includeAll path="db/changelog/2025" relativeToChangelogFile="false"/> -->

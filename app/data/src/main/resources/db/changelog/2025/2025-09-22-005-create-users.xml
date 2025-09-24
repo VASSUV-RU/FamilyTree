@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="2025-09-22-005-create-users" author="codex">
+        <createTable tableName="users">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avatar_url" type="varchar(512)"/>
+            <column name="telegram_id" type="bigint"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="preferred_family_id" type="varchar(36)"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="users"
+                              columnNames="telegram_id"
+                              constraintName="uk_users_telegram_id"/>
+        <createIndex tableName="users" indexName="idx_users_telegram_id">
+            <column name="telegram_id"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_preferred_family">
+            <column name="preferred_family_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

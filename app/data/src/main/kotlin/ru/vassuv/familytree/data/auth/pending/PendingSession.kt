@@ -10,6 +10,7 @@ data class PendingSessionRecord(
     val createdAt: Long = Instant.now().epochSecond,
     val invitationId: String? = null,
     val telegramId: Long? = null,
+    val userId: String? = null,
     val confirmedAt: Long? = null,
 )
 
@@ -30,7 +31,7 @@ sealed interface MarkUsedResult {
 interface PendingSessionRepository {
     fun create(sid: String, record: PendingSessionRecord, ttlSeconds: Long): Boolean
     fun get(sid: String): PendingSessionRecord?
-    fun markReady(sid: String, telegramId: Long): MarkReadyResult
+    fun markReady(sid: String, telegramId: Long, userId: String): MarkReadyResult
     fun markUsed(sid: String): MarkUsedResult
     fun isKnown(sid: String): Boolean
 }

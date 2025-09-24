@@ -16,8 +16,11 @@ import ru.vassuv.familytree.data.auth.pending.PendingSessionStatus.USED
 import ru.vassuv.familytree.service.auth.audit.AuthAuditEvent
 import ru.vassuv.familytree.service.auth.audit.AuthAuditService
 import ru.vassuv.familytree.service.auth.pending.SidGenerator
-import ru.vassuv.familytree.service.model.AuthTokens
 import ru.vassuv.familytree.service.model.CreatedTelegramSession
+import ru.vassuv.familytree.service.model.AuthTokens
+import ru.vassuv.familytree.service.user.User
+import ru.vassuv.familytree.service.user.UserService
+import ru.vassuv.familytree.config.exception.ConflictException
 
 sealed interface PollDelivery {
   object Pending : PollDelivery
@@ -30,6 +33,7 @@ class TelegramService(
   private val sidGenerator: SidGenerator,
   private val tokenService: TokenService,
   private val audit: AuthAuditService,
+  private val userService: UserService,
 ) {
   private val logger = LoggerFactory.getLogger(javaClass)
   fun createSession(invitationId: String?, ttlSeconds: Long): CreatedTelegramSession {
@@ -126,18 +130,30 @@ class TelegramService(
         return WebhookConfirmResult(false, "Session not found or expired")
       }
 
-    // TODO(ft-auth-03): Найти/создать аккаунт пользователя по telegramId
-    //   - Если пользователя нет — создать в БД (telegramId, username/first/last), привязать к приглашению при наличии
-    //   - Если есть invitationId у сессии — принять инвайт и назначить активную семью
-    //   - Подготовить серверную сессию (jti) для последующей выдачи токенов
+    val user = try {
+      upsertTelegramUser(tg)
+    } catch (ex: ConflictException) {
+      audit.logFailure(
+        event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRM_FAILED,
+        sid = sid,
+        userId = tg.id,
+        reason = "user-conflict",
+        details = mapOf("username" to tg.username)
+      )
+      logger.warn("User conflict during telegram confirm: sid={}, telegramId={}", sid, tg.id)
+      return WebhookConfirmResult(false, "Telegram account already linked")
+    }
 
-    return when (val res = pendingRepo.markReady(sid, tg.id)) {
+    return when (val res = pendingRepo.markReady(sid, tg.id, user.id)) {
       is ru.vassuv.familytree.data.auth.pending.MarkReadyResult.Ok -> {
         audit.logSuccess(
           event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRMED,
           sid = sid,
           userId = tg.id,
-          details = mapOf("status" to "ready")
+          details = mapOf(
+            "status" to "ready",
+            "userId" to user.id
+          )
         )
         WebhookConfirmResult(true, "Session confirmed. You can return to app.")
       }
@@ -146,7 +162,10 @@ class TelegramService(
           event = AuthAuditEvent.TELEGRAM_SESSION_CONFIRMED,
           sid = sid,
           userId = tg.id,
-          details = mapOf("status" to "already-ready")
+          details = mapOf(
+            "status" to "already-ready",
+            "userId" to user.id
+          )
         )
         WebhookConfirmResult(true, "Already confirmed. You can return to app.")
       }
@@ -179,6 +198,20 @@ class TelegramService(
         WebhookConfirmResult(false, "Temporary conflict, try again")
       }
     }
+}
+
+  private fun upsertTelegramUser(info: TelegramUserInfo): User {
+    val displayName = listOfNotNull(info.firstName, info.lastName)
+      .joinToString(" ")
+      .takeIf { it.isNotBlank() }
+      ?: info.username?.takeIf { it.isNotBlank() }
+      ?: "Telegram user ${info.id}"
+
+    return userService.upsertFromTelegram(
+      telegramId = info.id,
+      name = displayName,
+      avatarUrl = null
+    )
   }
 
 }
